@@ -1,19 +1,13 @@
-import { useParams } from 'react-router-dom';
-import FormBuilder from '../components/forms/FormBuilder';
+import MedicalFormBuilder from '../components/forms/MedicalFormBuilder';
 
 interface FormBuilderPageProps {
   isNew?: boolean;
 }
 
 const FormBuilderPage = ({ isNew = true }: FormBuilderPageProps) => {
-  const { formId } = useParams();
-  
   return (
-    <div className="h-full -mx-6">
-      <FormBuilder 
-        isNew={isNew} 
-        formId={formId ? parseInt(formId) : undefined}
-      />
+    <div className="h-screen flex flex-col">
+      <MedicalFormBuilder />
     </div>
   );
 };
