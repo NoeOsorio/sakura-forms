@@ -1,12 +1,8 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/shared/Button';
 import Card from '../components/shared/Card';
 import FormCard from '../components/forms/FormCard';
-
-// Props for the FormsPage component
-interface FormsPageProps {
-  onCreateForm?: () => void;
-}
 
 // Mock data
 const mockForms = [
@@ -52,17 +48,18 @@ const mockForms = [
   },
 ];
 
-const FormsPage = ({ onCreateForm }: FormsPageProps) => {
+const FormsPage = () => {
   const [forms] = useState(mockForms);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | null>(null);
+  const navigate = useNavigate();
 
   const handleView = (id: number) => {
     console.log(`Ver formulario ${id}`);
   };
 
   const handleEdit = (id: number) => {
-    console.log(`Editar formulario ${id}`);
+    navigate(`/forms/edit/${id}`);
   };
 
   const handleDelete = (id: number) => {
@@ -81,7 +78,9 @@ const FormsPage = ({ onCreateForm }: FormsPageProps) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Formularios</h1>
-        <Button onClick={onCreateForm}>Crear Nuevo Formulario</Button>
+        <Link to="/forms/new">
+          <Button>Crear Nuevo Formulario</Button>
+        </Link>
       </div>
 
       <Card>

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import Button from '../shared/Button';
-import Card from '../shared/Card';
-import FormFieldPicker from '../forms/FormFieldPicker';
-import FormPreview from '../forms/FormPreview';
+import FormFieldPicker from './FormFieldPicker';
+import Modal from '../shared/Modal';
 
 type FieldType = 
   | 'text' 
@@ -28,12 +27,17 @@ interface FormField {
   description?: string;
 }
 
-const FormBuilder = () => {
-  const [formTitle, setFormTitle] = useState('Nuevo Formulario');
+interface FormBuilderProps {
+  formId?: number | null;
+  isNew?: boolean;
+}
+
+const FormBuilder = ({ isNew = true }: FormBuilderProps) => {
+  const [formTitle, setFormTitle] = useState(isNew ? 'Nuevo Formulario' : 'Editar Formulario');
   const [formDescription, setFormDescription] = useState('');
   const [fields, setFields] = useState<FormField[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   
   // Add a new field
   const addField = (type: FieldType) => {
@@ -48,6 +52,7 @@ const FormBuilder = () => {
     
     setFields([...fields, newField]);
     setActiveFieldId(newField.id);
+    setAddModalOpen(false);
   };
   
   // Get default label based on field type
@@ -83,185 +88,459 @@ const FormBuilder = () => {
       setActiveFieldId(null);
     }
   };
+
+  // Get active field
+  const activeField = fields.find(field => field.id === activeFieldId);
+  
+  // Field type icon mapping
+  const fieldTypeIcons: Record<FieldType, string> = {
+    text: 'Aa',
+    email: '✉️',
+    phone: '📱',
+    number: '#',
+    checkbox: '☑️',
+    radio: '⭕',
+    select: '▼',
+    textarea: '¶',
+    date: '📅',
+    scale: '⭐',
+    file: '📎',
+    signature: '✍️'
+  };
   
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full">
-      {/* Left sidebar - field picker */}
-      <div className="w-full lg:w-64 flex-shrink-0">
-        <Card className="sticky top-20">
-          <h2 className="text-lg font-semibold mb-4">Añadir Campos</h2>
-          <FormFieldPicker onSelect={addField} />
-        </Card>
+    <div className="flex flex-col h-full bg-white">
+      {/* Header with form title and actions */}
+      <div className="px-6 py-4 border-b flex justify-between items-center bg-white sticky top-0 z-20 shadow-sm">
+        <input
+          type="text"
+          value={formTitle}
+          onChange={(e) => setFormTitle(e.target.value)}
+          className="text-xl font-medium border-none focus:outline-none focus:ring-0 w-full max-w-md"
+          placeholder="Nuevo Formulario"
+        />
+        
+        <div className="flex gap-3">
+          <Button variant="outline">Vista Previa</Button>
+          <Button>Publicar</Button>
+        </div>
       </div>
       
-      {/* Middle - form editor */}
-      <div className="flex-grow">
-        <Card>
-          <div className="mb-6">
-            <input
-              type="text"
-              value={formTitle}
-              onChange={(e) => setFormTitle(e.target.value)}
-              className="w-full text-2xl font-bold border-b border-gray-200 pb-2 focus:outline-none focus:border-teal-500"
-              placeholder="Título del formulario"
-            />
-            <textarea
-              value={formDescription}
-              onChange={(e) => setFormDescription(e.target.value)}
-              className="w-full mt-2 text-gray-600 focus:outline-none resize-none"
-              placeholder="Descripción (opcional)"
-              rows={2}
-            />
+      {/* Main content with 3-column layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left column - Field list */}
+        <div className="w-72 bg-white flex flex-col border-r z-10 overflow-hidden">
+          <div className="px-4 py-3 border-b flex justify-between items-center">
+            <h2 className="font-medium text-gray-700">Campos del formulario</h2>
+            <span className="text-xs bg-gray-100 rounded-full px-2 py-1 text-gray-600">{fields.length} campos</span>
           </div>
           
-          <div className="space-y-4">
-            {fields.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                <p className="text-gray-500 mb-4">Tu formulario está vacío</p>
-                <p className="text-gray-400 mb-6">Añade campos desde el panel izquierdo</p>
-                <Button onClick={() => addField('text')}>Añadir primer campo</Button>
+          <div className="flex-1 overflow-y-auto">
+            {/* Welcome screen item */}
+            <div 
+              className={`flex items-center p-3 cursor-pointer hover:bg-gray-50 
+                ${activeFieldId === 'welcome' ? 'bg-teal-50 border-l-4 border-teal-500' : 'border-l-4 border-transparent'}`}
+              onClick={() => setActiveFieldId('welcome')}
+            >
+              <div className="h-10 w-10 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center mr-3 text-lg">
+                🏠
               </div>
-            ) : (
-              fields.map((field, index) => (
-                <div 
-                  key={field.id}
-                  className={`p-4 rounded-lg border ${activeFieldId === field.id ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}
-                  onClick={() => setActiveFieldId(field.id)}
+              <div>
+                <p className="font-medium text-gray-800">Pantalla de bienvenida</p>
+                <p className="text-xs text-gray-500">Configuración inicial</p>
+              </div>
+            </div>
+            
+            {/* Form fields */}
+            {fields.map((field, index) => (
+              <div 
+                key={field.id}
+                className={`flex items-center p-3 cursor-pointer hover:bg-gray-50 group
+                  ${activeFieldId === field.id ? 'bg-teal-50 border-l-4 border-teal-500' : 'border-l-4 border-transparent'}`}
+                onClick={() => setActiveFieldId(field.id)}
+              >
+                <div className="h-10 w-10 rounded-full bg-gray-100 text-gray-800 flex items-center justify-center mr-3 font-medium">
+                  {index + 1}
+                </div>
+                <div className="overflow-hidden flex-grow">
+                  <p className="font-medium text-gray-800 truncate">{field.label}</p>
+                  <p className="text-xs text-gray-500 flex items-center">
+                    <span className="mr-1">{fieldTypeIcons[field.type]}</span>
+                    {field.type}
+                    {field.required && <span className="ml-2 text-red-500">*</span>}
+                  </p>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeField(field.id);
+                  }}
+                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
                 >
-                  <div className="flex justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="mr-2 text-gray-400">{index + 1}.</span>
-                      <input
-                        type="text"
-                        value={field.label}
-                        onChange={(e) => updateField(field.id, { label: e.target.value })}
-                        className={`font-medium focus:outline-none ${activeFieldId === field.id ? 'bg-teal-50' : 'bg-transparent'}`}
-                        placeholder="Etiqueta del campo"
-                      />
-                    </div>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => removeField(field.id)}
-                        className="text-gray-400 hover:text-red-500"
-                      >
-                        🗑️
-                      </button>
-                      <button className="text-gray-400 hover:text-gray-600 cursor-move">
-                        ⋮⋮
-                      </button>
-                    </div>
-                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          {/* Add field button - Positioned at the bottom with sticky positioning */}
+          <div className="p-4 border-t sticky bottom-0 bg-white mt-auto">
+            <Button 
+              onClick={() => setAddModalOpen(true)}
+              className="w-full flex items-center justify-center py-3 text-base"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="mr-2">
+                <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Añadir nuevo campo
+            </Button>
+          </div>
+        </div>
+        
+        {/* Middle column - Preview */}
+        <div className="flex-1 bg-gray-50 overflow-y-auto">
+          <div className="max-w-3xl mx-auto py-10 px-4">
+            {/* Welcome screen preview */}
+            {activeFieldId === 'welcome' && (
+              <div className="bg-white rounded-lg shadow-sm p-10 text-center">
+                <h1 className="text-3xl font-bold mb-4">{formTitle}</h1>
+                {formDescription && <p className="text-gray-600 mb-6">{formDescription}</p>}
+                <Button>Comenzar</Button>
+              </div>
+            )}
+            
+            {/* Active field preview */}
+            {activeField && (
+              <div className="bg-white rounded-lg shadow-sm p-10">
+                <h2 className="text-2xl font-medium mb-3">{activeField.label}</h2>
+                {activeField.description && (
+                  <p className="text-gray-600 mb-6">{activeField.description}</p>
+                )}
+                
+                {/* Field input preview based on type */}
+                <div className="mb-8">
+                  {activeField.type === 'text' && (
+                    <input
+                      type="text"
+                      placeholder={activeField.placeholder || 'Texto corto...'}
+                      className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                    />
+                  )}
                   
-                  {activeFieldId === field.id && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Texto de ayuda
-                          </label>
+                  {activeField.type === 'textarea' && (
+                    <textarea
+                      placeholder={activeField.placeholder || 'Texto largo...'}
+                      className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                      rows={4}
+                    />
+                  )}
+                  
+                  {activeField.type === 'radio' && activeField.options && (
+                    <div className="space-y-3">
+                      {activeField.options.map((option, i) => (
+                        <label key={i} className="flex items-center text-lg p-2 hover:bg-gray-50 rounded-md">
                           <input
-                            type="text"
-                            value={field.description || ''}
-                            onChange={(e) => updateField(field.id, { description: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
-                            placeholder="Texto de ayuda (opcional)"
+                            type="radio"
+                            name={`field-${activeField.id}`}
+                            className="h-5 w-5 text-teal-600 focus:ring-teal-500 mr-3"
                           />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Placeholder
-                          </label>
-                          <input
-                            type="text"
-                            value={field.placeholder || ''}
-                            onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
-                            placeholder="Texto de ejemplo"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <label className="inline-flex items-center">
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {activeField.type === 'checkbox' && activeField.options && (
+                    <div className="space-y-3">
+                      {activeField.options.map((option, i) => (
+                        <label key={i} className="flex items-center text-lg p-2 hover:bg-gray-50 rounded-md">
                           <input
                             type="checkbox"
-                            checked={field.required}
-                            onChange={(e) => updateField(field.id, { required: e.target.checked })}
-                            className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                            className="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 mr-3"
                           />
-                          <span className="ml-2 text-sm text-gray-700">Campo requerido</span>
+                          {option}
                         </label>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {activeField.type === 'select' && activeField.options && (
+                    <select
+                      className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                    >
+                      <option value="" disabled selected>Selecciona una opción</option>
+                      {activeField.options.map((option, i) => (
+                        <option key={i} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  )}
+                  
+                  {(activeField.type === 'email' || activeField.type === 'phone' || activeField.type === 'number') && (
+                    <input
+                      type={activeField.type}
+                      placeholder={activeField.placeholder || `Ingresa ${activeField.type === 'email' ? 'email' : activeField.type === 'phone' ? 'teléfono' : 'número'}...`}
+                      className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                    />
+                  )}
+                  
+                  {activeField.type === 'date' && (
+                    <input
+                      type="date"
+                      className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                    />
+                  )}
+                  
+                  {activeField.type === 'scale' && (
+                    <div className="flex justify-between items-center">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                        <button 
+                          key={num} 
+                          className="h-12 w-12 rounded-full border-2 border-gray-300 hover:border-teal-500 hover:bg-teal-50 flex items-center justify-center text-lg font-medium transition-colors"
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {activeField.type === 'file' && (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-400 hover:bg-teal-50 transition-colors cursor-pointer">
+                      <div className="text-gray-500 mb-2">
+                        <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
                       </div>
-                      
-                      {(field.type === 'radio' || field.type === 'select' || field.type === 'checkbox') && (
-                        <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Opciones
-                          </label>
-                          {field.options?.map((option, optionIndex) => (
-                            <div key={optionIndex} className="flex items-center mb-2">
-                              <input
-                                type="text"
-                                value={option}
-                                onChange={(e) => {
-                                  const newOptions = [...(field.options || [])];
-                                  newOptions[optionIndex] = e.target.value;
-                                  updateField(field.id, { options: newOptions });
-                                }}
-                                className="flex-grow px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
-                              />
-                              <button
-                                onClick={() => {
-                                  const newOptions = [...(field.options || [])];
-                                  newOptions.splice(optionIndex, 1);
-                                  updateField(field.id, { options: newOptions });
-                                }}
-                                className="ml-2 text-gray-400 hover:text-red-500"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                          <button
-                            onClick={() => {
-                              const newOptions = [...(field.options || []), `Opción ${(field.options?.length || 0) + 1}`];
-                              updateField(field.id, { options: newOptions });
-                            }}
-                            className="text-sm text-teal-600 hover:text-teal-800"
-                          >
-                            + Añadir opción
-                          </button>
-                        </div>
-                      )}
+                      <p className="text-lg">Arrastra archivos aquí o <span className="text-teal-600">selecciona un archivo</span></p>
+                    </div>
+                  )}
+                  
+                  {activeField.type === 'signature' && (
+                    <div className="border-2 border-gray-300 rounded-lg h-40 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-teal-400 hover:bg-teal-50 transition-colors">
+                      <p className="text-gray-400">Haz clic para firmar</p>
                     </div>
                   )}
                 </div>
-              ))
+                
+                {/* Navigation buttons */}
+                <div className="flex justify-between">
+                  <Button variant="outline">Anterior</Button>
+                  <Button>Siguiente</Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Empty state */}
+            {!activeFieldId && (
+              <div className="bg-white rounded-lg shadow-sm p-10 text-center">
+                <div className="flex justify-center mb-6">
+                  <svg width="60" height="60" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-300">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-medium mb-2">Selecciona un campo</h2>
+                <p className="text-gray-500 mb-6">Selecciona un campo de la izquierda para previsualizarlo o editarlo, o añade un nuevo campo para empezar</p>
+                <Button onClick={() => setAddModalOpen(true)}>
+                  Añadir primer campo
+                </Button>
+              </div>
             )}
           </div>
-          
-          <div className="mt-6 flex justify-end space-x-3">
-            <Button variant="outline">Cancelar</Button>
-            <Button>Guardar Formulario</Button>
+        </div>
+        
+        {/* Right column - Field properties */}
+        <div className="w-80 bg-white flex flex-col border-l overflow-hidden">
+          <div className="px-4 py-3 border-b">
+            <h2 className="font-medium text-gray-700">Propiedades del campo</h2>
           </div>
-        </Card>
+          
+          <div className="flex-1 overflow-y-auto p-5">
+            {activeFieldId === 'welcome' ? (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Título
+                  </label>
+                  <input
+                    type="text"
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    placeholder="Título del formulario"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    placeholder="Descripción del formulario"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Imagen (opcional)
+                  </label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-md hover:border-teal-400 cursor-pointer transition-colors">
+                    <div className="space-y-1 text-center">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div className="flex text-sm text-gray-600 justify-center">
+                        <label className="relative cursor-pointer bg-white rounded-md font-medium text-teal-600 hover:text-teal-500 focus-within:outline-none">
+                          <span>Subir imagen</span>
+                          <input type="file" className="sr-only" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : activeField ? (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pregunta
+                  </label>
+                  <input
+                    type="text"
+                    value={activeField.label}
+                    onChange={(e) => updateField(activeField.id, { label: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    placeholder="Escribe una pregunta"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Texto de ayuda
+                  </label>
+                  <input
+                    type="text"
+                    value={activeField.description || ''}
+                    onChange={(e) => updateField(activeField.id, { description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    placeholder="Añade un texto de ayuda..."
+                  />
+                </div>
+                
+                {(activeField.type === 'text' || activeField.type === 'email' || activeField.type === 'phone' || activeField.type === 'number' || activeField.type === 'textarea') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Placeholder
+                    </label>
+                    <input
+                      type="text"
+                      value={activeField.placeholder || ''}
+                      onChange={(e) => updateField(activeField.id, { placeholder: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      placeholder="Texto de ejemplo..."
+                    />
+                  </div>
+                )}
+                
+                {(activeField.type === 'radio' || activeField.type === 'select' || activeField.type === 'checkbox') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Opciones
+                    </label>
+                    {activeField.options?.map((option, optionIndex) => (
+                      <div key={optionIndex} className="flex items-center mb-2 group">
+                        <input
+                          type="text"
+                          value={option}
+                          onChange={(e) => {
+                            const newOptions = [...(activeField.options || [])];
+                            newOptions[optionIndex] = e.target.value;
+                            updateField(activeField.id, { options: newOptions });
+                          }}
+                          className="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        />
+                        <button
+                          onClick={() => {
+                            const newOptions = [...(activeField.options || [])];
+                            newOptions.splice(optionIndex, 1);
+                            updateField(activeField.id, { options: newOptions });
+                          }}
+                          className="ml-2 text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                          type="button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => {
+                        const newOptions = [...(activeField.options || []), `Opción ${(activeField.options?.length || 0) + 1}`];
+                        updateField(activeField.id, { options: newOptions });
+                      }}
+                      className="text-sm bg-gray-100 hover:bg-gray-200 text-teal-600 hover:text-teal-700 py-2 px-3 rounded-md flex items-center transition-colors w-full justify-center"
+                      type="button"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-1">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Añadir opción
+                    </button>
+                  </div>
+                )}
+                
+                <div className="pt-3 border-t">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={activeField.required}
+                      onChange={(e) => updateField(activeField.id, { required: e.target.checked })}
+                      className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Campo requerido</span>
+                  </label>
+                </div>
+                
+                <div className="pt-3 border-t">
+                  <Button 
+                    variant="danger" 
+                    onClick={() => removeField(activeField.id)}
+                    className="w-full justify-center"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-1">
+                      <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Eliminar campo
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                <div className="flex justify-center mb-4">
+                  <svg width="80" height="80" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-gray-300">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l-4-4m4 4l4-4" />
+                  </svg>
+                </div>
+                <p className="mb-2 font-medium">Ningún campo seleccionado</p>
+                <p>Selecciona un campo para ver y editar sus propiedades</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       
-      {/* Right sidebar - live preview */}
-      <div className="w-full lg:w-96 flex-shrink-0">
-        <Card className="sticky top-20">
-          <h2 className="text-lg font-semibold mb-4">Vista Previa</h2>
-          <div className="bg-white border border-gray-200 rounded-lg p-4 overflow-hidden">
-            <FormPreview 
-              title={formTitle}
-              description={formDescription}
-              fields={fields}
-              currentStep={currentStep}
-              onStepChange={setCurrentStep}
-            />
-          </div>
-        </Card>
-      </div>
+      {/* Add field modal */}
+      <Modal
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        title="Añadir nuevo campo"
+        size="lg"
+      >
+        <FormFieldPicker onSelect={addField} />
+      </Modal>
     </div>
   );
 };
