@@ -4,6 +4,7 @@ import { FormField, FieldType } from '../../types';
 import FormFieldCard from './FormFieldCard';
 import MedicalFormPreview from './MedicalFormPreview';
 import Button from '../shared/Button';
+import Modal from '../shared/Modal';
 
 const MedicalFormBuilder = () => {
   // Estados para manejar el formulario
@@ -12,10 +13,9 @@ const MedicalFormBuilder = () => {
   const [fields, setFields] = useState<FormField[]>([]);
   const [currentFieldIndex, setCurrentFieldIndex] = useState<number | null>(null);
   const [isPreview, setIsPreview] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Estado para controlar la visibilidad del modal
   const navigate = useNavigate();
   
-  // Obtener el campo actual
-  const currentField = currentFieldIndex !== null ? fields[currentFieldIndex] : null;
   
   // Añadir nuevo campo
   const addField = (type: FieldType) => {
@@ -31,6 +31,16 @@ const MedicalFormBuilder = () => {
     const newFields = [...fields, newField];
     setFields(newFields);
     setCurrentFieldIndex(newFields.length - 1);
+    setIsAddModalOpen(false); // Cerrar el modal después de añadir un campo
+    
+    // Desplazarse al campo recién añadido después de un pequeño retraso para permitir que el DOM se actualice
+    setTimeout(() => {
+      const fieldElements = document.querySelectorAll('.form-field-card');
+      if (fieldElements.length > 0) {
+        const lastField = fieldElements[fieldElements.length - 1];
+        lastField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
   
   // Obtener etiqueta predeterminada basada en el tipo de campo
@@ -104,6 +114,40 @@ const MedicalFormBuilder = () => {
   // Alternar vista previa
   const togglePreview = () => {
     setIsPreview(!isPreview);
+  };
+  
+  // Renderizar el selector de tipo de campo para el modal
+  const renderFieldTypePicker = () => {
+    const fieldTypes = [
+      { type: 'text', icon: 'Aa', label: 'Texto corto', description: 'Para respuestas breves como nombre, ciudad, etc.' },
+      { type: 'textarea', icon: '¶', label: 'Texto largo', description: 'Para respuestas extensas como comentarios o descripciones.' },
+      { type: 'email', icon: '@', label: 'Email', description: 'Campo con validación específica para correos electrónicos.' },
+      { type: 'phone', icon: '📞', label: 'Teléfono', description: 'Para números de teléfono con formato específico.' },
+      { type: 'number', icon: '#', label: 'Número', description: 'Para valores numéricos como edad, cantidad, etc.' },
+      { type: 'date', icon: '📅', label: 'Fecha', description: 'Para seleccionar fechas como cumpleaños o citas.' },
+      { type: 'select', icon: '▼', label: 'Desplegable', description: 'Lista desplegable para seleccionar una opción.' },
+      { type: 'radio', icon: '○', label: 'Opción única', description: 'Botones de radio para seleccionar una sola opción.' },
+    ];
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {fieldTypes.map((fieldType) => (
+          <div 
+            key={fieldType.type}
+            onClick={() => addField(fieldType.type as FieldType)}
+            className="flex items-center p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-md cursor-pointer transition-all"
+          >
+            <div className="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mr-4">
+              {fieldType.icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="text-md font-medium text-gray-800">{fieldType.label}</h3>
+              <p className="text-sm text-gray-500">{fieldType.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
   
   // Si estamos en modo vista previa, mostrar el componente de vista previa
@@ -207,6 +251,7 @@ const MedicalFormBuilder = () => {
                   canMoveDown={index < fields.length - 1}
                   onMoveUp={() => moveField(index, index - 1)}
                   onMoveDown={() => moveField(index, index + 1)}
+                  className="form-field-card"
                 />
               ))}
             </div>
@@ -217,85 +262,40 @@ const MedicalFormBuilder = () => {
               </svg>
               <h3 className="text-lg font-medium text-gray-700 mb-2">No hay campos en el formulario</h3>
               <p className="text-gray-500 mb-4">Añade un nuevo campo para comenzar</p>
+              <Button 
+                variant="primary" 
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Añadir campo
+              </Button>
             </div>
           )}
           
-          {/* Añadir nuevo campo */}
-          <div className="my-6">
-            <div className="grid grid-cols-4 gap-2">
+          {/* Botón flotante para añadir campos rápidamente */}
+          <div className="fixed bottom-6 right-6 z-10">
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => addField('text')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
+                onClick={() => setIsAddModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg flex items-center justify-center"
+                title="Añadir nuevo campo"
               >
-                <div className="text-blue-500 text-center mb-1">Aa</div>
-                <div className="text-sm font-medium text-gray-700">Texto corto</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('textarea')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">¶</div>
-                <div className="text-sm font-medium text-gray-700">Texto largo</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('radio')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">○</div>
-                <div className="text-sm font-medium text-gray-700">Opción única</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('select')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">▼</div>
-                <div className="text-sm font-medium text-gray-700">Desplegable</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('date')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">📅</div>
-                <div className="text-sm font-medium text-gray-700">Fecha</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('email')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">@</div>
-                <div className="text-sm font-medium text-gray-700">Email</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('phone')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">📞</div>
-                <div className="text-sm font-medium text-gray-700">Teléfono</div>
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => addField('number')}
-                className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-sm transition-all"
-              >
-                <div className="text-blue-500 text-center mb-1">#</div>
-                <div className="text-sm font-medium text-gray-700">Número</div>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
               </button>
             </div>
           </div>
+          
+          {/* Modal para añadir campos */}
+          <Modal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            title="Selecciona un tipo de campo"
+            size="lg"
+          >
+            {renderFieldTypePicker()}
+          </Modal>
           
           {/* Mensaje de guardar */}
           {fields.length > 0 && (

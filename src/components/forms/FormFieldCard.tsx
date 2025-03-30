@@ -13,6 +13,7 @@ interface FormFieldCardProps {
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  className?: string;
 }
 
 const FormFieldCard: React.FC<FormFieldCardProps> = ({
@@ -25,7 +26,8 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
   canMoveUp,
   canMoveDown,
   onMoveUp,
-  onMoveDown
+  onMoveDown,
+  className = ''
 }) => {
   const [showFieldMenu, setShowFieldMenu] = useState(false);
   
@@ -50,7 +52,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
         isActive 
           ? 'border-blue-500 shadow-md' 
           : 'border-gray-200 hover:border-gray-300 shadow-sm'
-      }`}
+      } ${className}`}
       onClick={onSelect}
     >
       <div className={`p-4 ${isActive ? 'bg-white' : 'bg-white'}`}>
