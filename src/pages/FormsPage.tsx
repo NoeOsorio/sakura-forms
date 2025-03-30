@@ -3,6 +3,11 @@ import Button from '../components/shared/Button';
 import Card from '../components/shared/Card';
 import FormCard from '../components/forms/FormCard';
 
+// Props for the FormsPage component
+interface FormsPageProps {
+  onCreateForm?: () => void;
+}
+
 // Mock data
 const mockForms = [
   {
@@ -47,7 +52,7 @@ const mockForms = [
   },
 ];
 
-const FormsPage = () => {
+const FormsPage = ({ onCreateForm }: FormsPageProps) => {
   const [forms] = useState(mockForms);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<boolean | null>(null);
@@ -76,7 +81,7 @@ const FormsPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Formularios</h1>
-        <Button>Crear Nuevo Formulario</Button>
+        <Button onClick={onCreateForm}>Crear Nuevo Formulario</Button>
       </div>
 
       <Card>
