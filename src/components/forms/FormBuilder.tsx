@@ -38,6 +38,8 @@ const FormBuilder = ({ isNew = true }: FormBuilderProps) => {
   const [fields, setFields] = useState<FormField[]>([]);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(-1);
   
   // Add a new field
   const addField = (type: FieldType) => {
@@ -108,6 +110,21 @@ const FormBuilder = ({ isNew = true }: FormBuilderProps) => {
     signature: '✍️'
   };
   
+  // Preview navigation
+  const totalSteps = fields.length; // Only count actual form fields
+  
+  const goToNextStep = () => {
+    if (currentPreviewIndex < fields.length) { // Can go until the last field
+      setCurrentPreviewIndex(currentPreviewIndex + 1);
+    }
+  };
+  
+  const goToPreviousStep = () => {
+    if (currentPreviewIndex > 0) { // Can go back to welcome screen
+      setCurrentPreviewIndex(currentPreviewIndex - 1);
+    }
+  };
+  
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header with form title and actions */}
@@ -121,7 +138,13 @@ const FormBuilder = ({ isNew = true }: FormBuilderProps) => {
         />
         
         <div className="flex gap-3">
-          <Button variant="outline">Vista Previa</Button>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              setPreviewModalOpen(true);
+              setCurrentPreviewIndex(0); // Start at welcome screen
+            }}
+          >Vista Previa</Button>
           <Button>Publicar</Button>
         </div>
       </div>
@@ -540,6 +563,207 @@ const FormBuilder = ({ isNew = true }: FormBuilderProps) => {
         size="lg"
       >
         <FormFieldPicker onSelect={addField} />
+      </Modal>
+      
+      {/* Preview modal */}
+      <Modal
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        title="Vista previa del formulario"
+        size="xl"
+      >
+        <div className="flex flex-col items-center">
+          {/* Progress indicator - only show for fields, not for welcome screen or thank you screen */}
+          {currentPreviewIndex > 0 && currentPreviewIndex <= fields.length && fields.length > 0 && (
+            <div className="w-full mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-500">
+                  {`Paso ${currentPreviewIndex} de ${totalSteps}`}
+                </span>
+                <span className="text-sm font-medium text-gray-500">
+                  {Math.round((currentPreviewIndex / totalSteps) * 100)}%
+                </span>
+              </div>
+              <div className="bg-gray-200 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out" 
+                  style={{ width: `${(currentPreviewIndex / totalSteps) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+          
+          {/* Content area */}
+          <div className="max-w-xl w-full">
+            {/* Welcome screen */}
+            {currentPreviewIndex === 0 && (
+              <div className="bg-white rounded-lg p-10 text-center">
+                <h1 className="text-3xl font-bold mb-4">{formTitle}</h1>
+                {formDescription && <p className="text-gray-600 mb-6">{formDescription}</p>}
+                <Button onClick={goToNextStep} disabled={fields.length === 0}>
+                  {fields.length === 0 ? 'No hay campos en el formulario' : 'Comenzar'}
+                </Button>
+              </div>
+            )}
+            
+            {/* Field preview */}
+            {currentPreviewIndex > 0 && currentPreviewIndex <= fields.length && (
+              <div className="bg-white rounded-lg p-10">
+                {/* Current field is fields[currentPreviewIndex - 1] */}
+                {(() => {
+                  const field = fields[currentPreviewIndex - 1];
+                  return (
+                    <>
+                      <h2 className="text-2xl font-medium mb-3">{field.label}</h2>
+                      {field.description && (
+                        <p className="text-gray-600 mb-6">{field.description}</p>
+                      )}
+                      
+                      {/* Field input preview based on type */}
+                      <div className="mb-8">
+                        {field.type === 'text' && (
+                          <input
+                            type="text"
+                            placeholder={field.placeholder || 'Texto corto...'}
+                            className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                          />
+                        )}
+                        
+                        {field.type === 'textarea' && (
+                          <textarea
+                            placeholder={field.placeholder || 'Texto largo...'}
+                            className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                            rows={4}
+                          />
+                        )}
+                        
+                        {field.type === 'radio' && field.options && (
+                          <div className="space-y-3">
+                            {field.options.map((option, i) => (
+                              <label key={i} className="flex items-center text-lg p-2 hover:bg-gray-50 rounded-md">
+                                <input
+                                  type="radio"
+                                  name={`field-${field.id}`}
+                                  className="h-5 w-5 text-teal-600 focus:ring-teal-500 mr-3"
+                                />
+                                {option}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {field.type === 'checkbox' && field.options && (
+                          <div className="space-y-3">
+                            {field.options.map((option, i) => (
+                              <label key={i} className="flex items-center text-lg p-2 hover:bg-gray-50 rounded-md">
+                                <input
+                                  type="checkbox"
+                                  className="h-5 w-5 rounded text-teal-600 focus:ring-teal-500 mr-3"
+                                />
+                                {option}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {field.type === 'select' && field.options && (
+                          <select
+                            className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                          >
+                            <option value="" disabled selected>Selecciona una opción</option>
+                            {field.options.map((option, i) => (
+                              <option key={i} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        )}
+                        
+                        {(field.type === 'email' || field.type === 'phone' || field.type === 'number') && (
+                          <input
+                            type={field.type}
+                            placeholder={field.placeholder || `Ingresa ${field.type === 'email' ? 'email' : field.type === 'phone' ? 'teléfono' : 'número'}...`}
+                            className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                          />
+                        )}
+                        
+                        {field.type === 'date' && (
+                          <input
+                            type="date"
+                            className="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                          />
+                        )}
+                        
+                        {field.type === 'scale' && (
+                          <div className="flex justify-between items-center">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                              <button 
+                                key={num} 
+                                className="h-12 w-12 rounded-full border-2 border-gray-300 hover:border-teal-500 hover:bg-teal-50 flex items-center justify-center text-lg font-medium transition-colors"
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {field.type === 'file' && (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-400 hover:bg-teal-50 transition-colors cursor-pointer">
+                            <div className="text-gray-500 mb-2">
+                              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            </div>
+                            <p className="text-lg">Arrastra archivos aquí o <span className="text-teal-600">selecciona un archivo</span></p>
+                          </div>
+                        )}
+                        
+                        {field.type === 'signature' && (
+                          <div className="border-2 border-gray-300 rounded-lg h-40 flex items-center justify-center bg-gray-50 cursor-pointer hover:border-teal-400 hover:bg-teal-50 transition-colors">
+                            <p className="text-gray-400">Haz clic para firmar</p>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+            
+            {/* Thank you screen */}
+            {currentPreviewIndex > 0 && currentPreviewIndex > fields.length && (
+              <div className="bg-white rounded-lg p-10 text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="h-16 w-16 rounded-full bg-teal-100 flex items-center justify-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-600">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-2xl font-medium mb-4">¡Gracias por completar el formulario!</h2>
+                <p className="text-gray-600 mb-6">Tus respuestas han sido registradas.</p>
+                <Button 
+                  onClick={() => setPreviewModalOpen(false)} 
+                  variant="outline"
+                >
+                  Cerrar vista previa
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          {/* Navigation buttons */}
+          {currentPreviewIndex > 0 && currentPreviewIndex <= fields.length && (
+            <div className="flex justify-between w-full max-w-xl mt-8">
+              <Button variant="outline" onClick={goToPreviousStep}>
+                {currentPreviewIndex === 1 ? 'Volver a inicio' : 'Anterior'}
+              </Button>
+              {currentPreviewIndex === fields.length ? (
+                <Button onClick={() => setCurrentPreviewIndex(fields.length + 1)}>Finalizar</Button>
+              ) : (
+                <Button onClick={goToNextStep}>Siguiente</Button>
+              )}
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );
