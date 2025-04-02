@@ -51,7 +51,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
       className={`border rounded-lg overflow-hidden transition-all ${
         isActive 
           ? 'border-blue-500 shadow-md' 
-          : 'border-gray-200 hover:border-gray-300 shadow-sm'
+          : 'border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
       } ${className}`}
       onClick={onSelect}
     >
@@ -160,6 +160,16 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                   <p className="text-sm text-gray-500">{field.placeholder}</p>
                 )}
                 {renderOptions()}
+                
+                {/* Indicador de edición */}
+                <div className="mt-2 flex items-center">
+                  <div className="flex items-center text-xs text-blue-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    <span>Haz clic para editar</span>
+                  </div>
+                </div>
               </>
             )}
           </div>
@@ -264,38 +274,6 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                     </svg>
                     Duplicar
                   </button>
-                  {canMoveUp && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMoveUp();
-                        setShowFieldMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                      </svg>
-                      Mover arriba
-                    </button>
-                  )}
-                  {canMoveDown && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMoveDown();
-                        setShowFieldMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                      Mover abajo
-                    </button>
-                  )}
                   <button
                     type="button"
                     onClick={(e) => {
