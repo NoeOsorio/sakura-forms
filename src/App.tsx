@@ -3,6 +3,9 @@ import MainLayout from './components/layout/MainLayout'
 import HomePage from './pages/HomePage'
 import FormsPage from './pages/FormsPage'
 import FormBuilderPage from './pages/FormBuilderPage'
+import SettingsPage from './pages/SettingsPage'
+import ResponsesPage from './pages/ResponsesPage'
+import TemplatesPage from './pages/TemplatesPage'
 import './App.css'
 
 function App() {
@@ -30,11 +33,11 @@ function App() {
         <Route path="/forms" element={<FormsPage />} />
         <Route path="/forms/new" element={<FormBuilderPage isNew={true} />} />
         <Route path="/forms/edit/:formId" element={<FormBuilderPage isNew={false} />} />
-        <Route path="/responses" element={<div className="p-6">Página de respuestas en desarrollo</div>} />
-        <Route path="/responses/:formId" element={<div className="p-6">Respuestas para formulario específico</div>} />
-        <Route path="/templates" element={<div className="p-6">Página de plantillas en desarrollo</div>} />
+        <Route path="/responses" element={<ResponsesPage />} />
+        <Route path="/responses/:formId" element={<ResponsesPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/templates/:templateId/use" element={<FormBuilderPage isNew={true} />} />
-        <Route path="/settings" element={<div className="p-6">Configuración de la cuenta y preferencias</div>} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<div className="p-6 text-center">Página no encontrada</div>} />
       </Routes>
     </MainLayout>
