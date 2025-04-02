@@ -5,76 +5,40 @@ import Card from '../shared/Card';
 import Modal from '../shared/Modal';
 import FormInput from './FormInput';
 import FormFieldProperties from './FormFieldProperties';
-import { FormField, FieldType } from '../../types';
+import { FieldType } from '../../types';
 import { validateField } from '../../validation/ValidationHelper';
+import { useFormBuilder } from '../../hooks/useFormBuilder';
 
 const FormBuilder = () => {
-  // Estados para manejar el formulario
-  const [title, setTitle] = useState('Mi Formulario');
-  const [description, setDescription] = useState('Descripción de mi formulario');
-  const [fields, setFields] = useState<FormField[]>([]);
-  const [currentFieldIndex, setCurrentFieldIndex] = useState<number | null>(null);
+  const {
+    state,
+    addField,
+    removeField,
+    updateField,
+    saveForm,
+    updateTitle,
+    updateDescription,
+    setCurrentFieldIndex,
+    toggleAddModal,
+  } = useFormBuilder();
+
+  const {
+    title,
+    description,
+    fields,
+    currentFieldIndex,
+    isAddModalOpen,
+  } = state;
+
   const [step, setStep] = useState<'fields' | 'preview' | 'thankyou'>('fields');
   const [previewCurrentIndex, setPreviewCurrentIndex] = useState(0);
   const [fieldValues, setFieldValues] = useState<Record<number, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<number, string>>({});
-  const [addModalOpen, setAddModalOpen] = useState(false);
   
   const navigate = useNavigate();
   
   // Obtener el campo actual
   const currentField = currentFieldIndex !== null ? fields[currentFieldIndex] : null;
-  
-  // Manejar la adición de nuevos campos
-  const addField = (type: FieldType) => {
-    const newField: FormField = {
-      id: Date.now(),
-      type,
-      label: getDefaultLabelForType(type),
-      placeholder: 'Escriba aquí...',
-      required: false,
-      options: type === 'select' || type === 'radio' ? ['Opción 1', 'Opción 2'] : [],
-    };
-    
-    setFields([...fields, newField]);
-    setCurrentFieldIndex(fields.length);
-    setAddModalOpen(false);
-  };
-  
-  // Obtener etiqueta predeterminada basada en el tipo de campo
-  const getDefaultLabelForType = (type: FieldType): string => {
-    switch (type) {
-      case 'text': return 'Pregunta de texto';
-      case 'email': return 'Correo electrónico';
-      case 'phone': return 'Número de teléfono';
-      case 'number': return 'Número';
-      case 'select': return 'Lista desplegable';
-      case 'radio': return 'Selección única';
-      case 'textarea': return 'Respuesta larga';
-      case 'date': return 'Fecha';
-      default: return 'Nueva pregunta';
-    }
-  };
-  
-  // Eliminar un campo
-  const removeField = (index: number) => {
-    const newFields = [...fields];
-    newFields.splice(index, 1);
-    setFields(newFields);
-    
-    if (currentFieldIndex === index) {
-      setCurrentFieldIndex(newFields.length > 0 ? 0 : null);
-    } else if (currentFieldIndex !== null && index < currentFieldIndex) {
-      setCurrentFieldIndex(currentFieldIndex - 1);
-    }
-  };
-  
-  // Actualizar un campo
-  const updateField = (index: number, updatedField: Partial<FormField>) => {
-    const newFields = [...fields];
-    newFields[index] = { ...newFields[index], ...updatedField };
-    setFields(newFields);
-  };
   
   // Manejar cambio de valores en el modo vista previa
   const handleFieldValueChange = (id: number, value: string) => {
@@ -121,13 +85,6 @@ const FormBuilder = () => {
     if (previewCurrentIndex > 0) {
       setPreviewCurrentIndex(previewCurrentIndex - 1);
     }
-  };
-  
-  // Guardar formulario
-  const saveForm = () => {
-    // Aquí implementarías la lógica para guardar el formulario
-    console.log('Formulario guardado:', { title, description, fields });
-    navigate('/forms');
   };
 
   // Renderizar selector de tipo de campo
@@ -277,7 +234,7 @@ const FormBuilder = () => {
                     <input
                       type="text"
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={(e) => updateTitle(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
@@ -285,7 +242,7 @@ const FormBuilder = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                     <textarea
                       value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      onChange={(e) => updateDescription(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       rows={2}
                     />
@@ -323,7 +280,7 @@ const FormBuilder = () => {
               <div className="sticky bottom-0 pt-2 pb-2 bg-gray-50">
                 <Button
                   variant="primary"
-                  onClick={() => setAddModalOpen(true)}
+                  onClick={() => toggleAddModal(true)}
                   className="w-full flex items-center justify-center py-3 text-base"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -479,8 +436,8 @@ const FormBuilder = () => {
       
       {/* Modal para añadir campos */}
       <Modal
-        isOpen={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        isOpen={isAddModalOpen}
+        onClose={() => toggleAddModal(false)}
         title="Añadir nuevo campo"
         size="lg"
       >

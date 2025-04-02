@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { FormField } from '../../types';
-import FormInput from './FormInput';
+import { 
+  TrashIcon, 
+  DocumentDuplicateIcon, 
+  ChevronUpIcon, 
+  ChevronDownIcon,
+  PlusIcon,
+  DocumentTextIcon,
+  ChatBubbleBottomCenterTextIcon,
+  ListBulletIcon,
+  CheckCircleIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  CalculatorIcon,
+  CalendarDaysIcon
+} from '@heroicons/react/24/outline';
 
 interface FormFieldCardProps {
   field: FormField;
@@ -16,6 +30,66 @@ interface FormFieldCardProps {
   className?: string;
 }
 
+type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'email' | 'tel' | 'number' | 'date';
+
+type IconComponent = React.ForwardRefExoticComponent<
+  Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
+    title?: string;
+    titleId?: string;
+  } & React.RefAttributes<SVGSVGElement>
+>;
+
+type FieldConfig = {
+  [K in FieldType]: {
+    icon: IconComponent;
+    label: string;
+    gradient: string;
+  }
+};
+
+const fieldTypes: FieldConfig = {
+  text: { 
+    icon: DocumentTextIcon, 
+    label: 'Texto', 
+    gradient: 'from-blue-500 to-cyan-300'
+  },
+  textarea: { 
+    icon: ChatBubbleBottomCenterTextIcon, 
+    label: 'Párrafo', 
+    gradient: 'from-violet-500 to-purple-300'
+  },
+  select: { 
+    icon: ListBulletIcon, 
+    label: 'Lista', 
+    gradient: 'from-fuchsia-500 to-pink-300'
+  },
+  radio: { 
+    icon: CheckCircleIcon, 
+    label: 'Opciones', 
+    gradient: 'from-rose-500 to-red-300'
+  },
+  email: { 
+    icon: EnvelopeIcon, 
+    label: 'Email', 
+    gradient: 'from-emerald-500 to-green-300'
+  },
+  tel: { 
+    icon: PhoneIcon, 
+    label: 'Teléfono', 
+    gradient: 'from-orange-500 to-amber-300'
+  },
+  number: { 
+    icon: CalculatorIcon, 
+    label: 'Número', 
+    gradient: 'from-red-500 to-orange-300'
+  },
+  date: { 
+    icon: CalendarDaysIcon, 
+    label: 'Fecha', 
+    gradient: 'from-teal-500 to-cyan-300'
+  }
+};
+
 const FormFieldCard: React.FC<FormFieldCardProps> = ({
   field,
   isActive,
@@ -29,67 +103,92 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
   onMoveDown,
   className = ''
 }) => {
-  const [showFieldMenu, setShowFieldMenu] = useState(false);
-  
-  // Renderizar las opciones para campos select/radio
-  const renderOptions = () => {
-    if (field.type !== 'select' && field.type !== 'radio') return null;
-    
-    return (
-      <div className="mt-2">
-        {field.options?.map((option, index) => (
-          <div key={index} className="text-sm text-gray-500 ml-6">
-            {field.type === 'radio' ? '○' : '•'} {option}
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
+  const [showMenu, setShowMenu] = useState(false);
+  const fieldConfig = fieldTypes[field.type as FieldType] || fieldTypes.text;
+  const IconComponent = fieldConfig.icon;
+
   return (
     <div 
-      className={`border rounded-lg overflow-hidden transition-all ${
-        isActive 
-          ? 'border-blue-500 shadow-md' 
-          : 'border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
-      } ${className}`}
+      className={`relative bg-white ${className}`}
       onClick={onSelect}
     >
-      <div className={`p-4 ${isActive ? 'bg-white' : 'bg-white'}`}>
-        <div className="flex items-start justify-between">
-          <div className="flex-grow">
-            {isActive ? (
-              <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Pregunta
-                </label>
-                <input
-                  type="text"
-                  value={field.label}
-                  onChange={(e) => onChange({ label: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <div className="mt-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Texto de ayuda (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={field.placeholder || ''}
-                    onChange={(e) => onChange({ placeholder: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Añade un texto de ayuda..."
-                  />
-                </div>
-                
-                {(field.type === 'select' || field.type === 'radio') && (
-                  <div className="mt-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Opciones
-                    </label>
-                    <div className="space-y-2">
+      <div className={`
+        absolute inset-0 bg-gradient-to-r ${fieldConfig.gradient} opacity-[0.08]
+        ${isActive ? 'opacity-[0.15]' : 'group-hover:opacity-[0.12]'}
+      `} />
+
+      <div className="relative">
+        {/* Barra lateral con icono */}
+        <div className={`
+          absolute left-0 top-0 bottom-0 w-1.5
+          bg-gradient-to-b ${fieldConfig.gradient}
+        `} />
+
+        <div className="pl-6 pr-4 py-6">
+          <div className="flex items-start gap-6">
+            {/* Icono y tipo */}
+            <div className={`
+              flex-none w-12 h-12 rounded-2xl bg-gradient-to-br ${fieldConfig.gradient}
+              flex items-center justify-center transform transition-transform
+              ${isActive ? 'scale-110' : 'group-hover:scale-105'}
+            `}>
+              <IconComponent className="h-6 w-6 text-white" />
+            </div>
+
+            {/* Contenido principal */}
+            <div className="flex-1 min-w-0 space-y-6">
+              {isActive ? (
+                <>
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      value={field.label}
+                      onChange={(e) => onChange({ label: e.target.value })}
+                      className="w-full px-4 py-3 text-lg bg-transparent border-b-2 border-gray-200 
+                        focus:border-current focus:outline-none transition-colors placeholder-gray-400"
+                      placeholder="¿Qué quieres preguntar?"
+                      style={{ borderImage: `linear-gradient(to right, ${fieldConfig.gradient}) 1` }}
+                    />
+                    
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium text-gray-700 text-left">
+                        Descripción del campo
+                      </label>
+                      <input
+                        type="text"
+                        value={field.description || ''}
+                        onChange={(e) => onChange({ description: e.target.value })}
+                        className="w-full px-4 py-2 text-gray-500 bg-gray-50/50 rounded-xl
+                          focus:outline-none focus:bg-gray-50/80 transition-colors"
+                        placeholder="Explica qué debe ingresar el usuario..."
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label className="block text-sm font-medium text-gray-700 text-left">
+                        Texto de ayuda (placeholder)
+                      </label>
+                      <input
+                        type="text"
+                        value={field.placeholder || ''}
+                        onChange={(e) => onChange({ placeholder: e.target.value })}
+                        className="w-full px-4 py-2 text-gray-500 bg-gray-50/50 rounded-xl
+                          focus:outline-none focus:bg-gray-50/80 transition-colors"
+                        placeholder="Describa su situación"
+                      />
+                    </div>
+                  </div>
+
+                  {(field.type === 'select' || field.type === 'radio') && (
+                    <div className="space-y-3 pt-2">
                       {field.options?.map((option, index) => (
-                        <div key={index} className="flex items-center">
+                        <div key={index} className="group/option flex items-center gap-3 bg-gray-50/50 rounded-xl p-2">
+                          <div className={`
+                            w-7 h-7 rounded-full bg-gradient-to-br ${fieldConfig.gradient}
+                            flex items-center justify-center shadow-sm
+                          `}>
+                            <span className="text-sm font-medium text-white">{index + 1}</span>
+                          </div>
                           <input
                             type="text"
                             value={option}
@@ -98,212 +197,283 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                               newOptions[index] = e.target.value;
                               onChange({ options: newOptions });
                             }}
-                            className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="flex-1 px-3 py-2 bg-white/50 rounded-lg border-0
+                              focus:outline-none focus:ring-1 ring-gray-200 text-gray-700"
+                            placeholder={`Opción ${index + 1}`}
                           />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newOptions = [...(field.options || [])];
-                              newOptions.splice(index, 1);
-                              onChange({ options: newOptions });
-                            }}
-                            className="ml-2 text-gray-400 hover:text-red-500"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
+                          <div className="group/tooltip relative">
+                            <button
+                              onClick={() => {
+                                const newOptions = field.options?.filter((_, i) => i !== index) || [];
+                                onChange({ options: newOptions });
+                              }}
+                              className="opacity-0 group-hover/option:opacity-100 p-2 text-gray-400 
+                                hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
+                              aria-label="Eliminar opción"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
+                              bg-gray-800 text-white text-xs rounded opacity-0 group-hover/tooltip:opacity-100 
+                              transition-opacity duration-150 whitespace-nowrap pointer-events-none">
+                              Eliminar opción
+                            </div>
+                          </div>
                         </div>
                       ))}
                       <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const newOptions = [...(field.options || []), `Opción ${(field.options?.length || 0) + 1}`];
+                        onClick={() => {
+                          const newOptions = [...(field.options || []), ''];
                           onChange({ options: newOptions });
                         }}
-                        className="text-blue-500 text-sm flex items-center"
+                        className={`
+                          w-full flex items-center justify-center gap-2 px-4 py-2.5 
+                          text-sm font-medium rounded-xl bg-gradient-to-r ${fieldConfig.gradient} 
+                          text-white shadow-sm hover:shadow-md transition-all
+                        `}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Añadir opción
+                        <PlusIcon className="h-5 w-5" />
+                        Agregar opción
                       </button>
                     </div>
+                  )}
+
+                  <div className="flex items-start gap-3 pt-4">
+                    <input
+                      type="checkbox"
+                      id={`required-${field.id}`}
+                      checked={field.required}
+                      onChange={(e) => onChange({ required: e.target.checked })}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    <label 
+                      htmlFor={`required-${field.id}`}
+                      className="text-sm text-gray-600"
+                    >
+                      Campo requerido
+                    </label>
                   </div>
-                )}
-                
-                <div className="mt-3 flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`required-${field.id}`}
-                    checked={field.required || false}
-                    onChange={(e) => onChange({ required: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor={`required-${field.id}`} className="ml-2 block text-sm text-gray-700">
-                    Campo obligatorio
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center mb-1">
-                  <div className="mr-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded capitalize">
-                    {field.type}
+                </>
+              ) : (
+                <>
+                  <div className="space-y-3 text-left">
+                    <div className="flex items-center gap-2">
+                      <div className="text-xl font-medium text-left">
+                        {field.label || '¿Qué quieres preguntar?'}
+                      </div>
+                      <span className="text-sm px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                        {fieldConfig.label}
+                      </span>
+                      {field.required && (
+                        <span className="text-sm px-2 py-0.5 bg-red-50 text-red-600 rounded-full">
+                          Requerido
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col gap-1.5 text-sm">
+                      <div className="text-gray-600">
+                        <span className="font-medium">Tipo de campo:</span> {fieldConfig.label}
+                        {(field.type === 'select' || field.type === 'radio') && field.options && (
+                          <span className="ml-2 text-gray-500">
+                            ({field.options.length} opciones)
+                          </span>
+                        )}
+                      </div>
+                      
+                      {field.description ? (
+                        <div className="text-gray-600">
+                          <span className="font-medium">Descripción:</span> {field.description}
+                        </div>
+                      ) : (
+                        <div className="text-gray-400 italic">
+                          Agrega una descripción para ayudar al usuario...
+                        </div>
+                      )}
+                      
+                      {field.placeholder && (
+                        <div className="text-gray-500">
+                          <span className="font-medium">Ejemplo:</span> {field.placeholder}
+                        </div>
+                      )}
+                      
+                      {field.type === 'email' && (
+                        <div className="text-gray-500">
+                          <span className="font-medium">Formato:</span> ejemplo@dominio.com
+                        </div>
+                      )}
+                      
+                      {(field.type as FieldType) === 'tel' && (
+                        <div className="text-gray-500">
+                          <span className="font-medium">Formato:</span> +1234567890
+                        </div>
+                      )}
+                      
+                      {field.type === 'date' && (
+                        <div className="text-gray-500">
+                          <span className="font-medium">Formato:</span> DD/MM/AAAA
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <h3 className="font-medium text-gray-800">{field.label}</h3>
-                  {field.required && <span className="ml-1 text-red-500">*</span>}
-                </div>
-                {field.placeholder && (
-                  <p className="text-sm text-gray-500">{field.placeholder}</p>
+
+                  {(field.type === 'select' || field.type === 'radio') && 
+                   field.options && field.options.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      <div className="text-sm font-medium text-gray-700">
+                        Opciones disponibles:
+                      </div>
+                      {field.options.map((option, index) => (
+                        <div key={index} className="flex items-center gap-3 pl-2 py-1.5 bg-gray-50/50 rounded-lg">
+                          <span className={`
+                            w-5 h-5 rounded-full bg-gradient-to-br ${fieldConfig.gradient}
+                            flex items-center justify-center text-xs font-medium text-white
+                          `}>
+                            {index + 1}
+                          </span>
+                          <span className="text-gray-700">{option}</span>
+                        </div>
+                      ))}
+                      {field.options.length < 2 && (
+                        <div className="text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+                          Se recomienda agregar al menos 2 opciones para este tipo de campo.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {(field.type === 'select' || field.type === 'radio') && 
+                   (!field.options || field.options.length === 0) && (
+                    <div className="mt-4 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+                      Este campo requiere opciones. Haz clic para agregarlas.
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Acciones */}
+            <div className="flex-none">
+              <div className={`
+                flex flex-col gap-2 p-1 rounded-2xl bg-gray-50/80
+                ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+                transition-opacity duration-200
+              `}>
+                {isActive && (
+                  <>
+                    {canMoveUp && (
+                      <div className="group/tooltip relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveUp();
+                          }}
+                          className="p-2 text-gray-400 hover:text-gray-600 
+                            hover:bg-gray-100 rounded-xl transition-colors"
+                          aria-label="Mover campo hacia arriba"
+                        >
+                          <ChevronUpIcon className="h-5 w-5" />
+                        </button>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
+                          bg-gray-800 text-white text-xs rounded opacity-0 group-hover/tooltip:opacity-100 
+                          transition-opacity duration-150 whitespace-nowrap pointer-events-none">
+                          Mover hacia arriba
+                        </div>
+                      </div>
+                    )}
+                    {canMoveDown && (
+                      <div className="group/tooltip relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveDown();
+                          }}
+                          className="p-2 text-gray-400 hover:text-gray-600 
+                            hover:bg-gray-100 rounded-xl transition-colors"
+                          aria-label="Mover campo hacia abajo"
+                        >
+                          <ChevronDownIcon className="h-5 w-5" />
+                        </button>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
+                          bg-gray-800 text-white text-xs rounded opacity-0 group-hover/tooltip:opacity-100 
+                          transition-opacity duration-150 whitespace-nowrap pointer-events-none">
+                          Mover hacia abajo
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
-                {renderOptions()}
-                
-                {/* Indicador de edición */}
-                <div className="mt-2 flex items-center">
-                  <div className="flex items-center text-xs text-blue-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                    <span>Haz clic para editar</span>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          
-          <div className="flex items-center ml-2">
-            {isActive && (
-              <div className="flex space-x-1">
-                {canMoveUp && (
+                <div className="group/tooltip relative">
                   <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveUp();
-                    }}
-                    className="p-1 text-gray-400 hover:text-blue-500"
-                    title="Mover arriba"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                )}
-                
-                {canMoveDown && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMoveDown();
-                    }}
-                    className="p-1 text-gray-400 hover:text-blue-500"
-                    title="Mover abajo"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                )}
-                
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDuplicate();
-                  }}
-                  className="p-1 text-gray-400 hover:text-blue-500"
-                  title="Duplicar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove();
-                  }}
-                  className="p-1 text-gray-400 hover:text-red-500"
-                  title="Eliminar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            )}
-            
-            {!isActive && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowFieldMenu(!showFieldMenu);
-                }}
-                className="p-1 text-gray-400 hover:text-gray-600"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-              </button>
-            )}
-            
-            {showFieldMenu && !isActive && (
-              <div 
-                className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="py-1">
-                  <button
-                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDuplicate();
-                      setShowFieldMenu(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                    className="p-2 text-gray-400 hover:text-gray-600 
+                      hover:bg-gray-100 rounded-xl transition-colors"
+                    aria-label="Duplicar campo"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Duplicar
+                    <DocumentDuplicateIcon className="h-5 w-5" />
                   </button>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
+                    bg-gray-800 text-white text-xs rounded opacity-0 group-hover/tooltip:opacity-100 
+                    transition-opacity duration-150 whitespace-nowrap pointer-events-none">
+                    Duplicar campo
+                  </div>
+                </div>
+                <div className="group/tooltip relative">
                   <button
-                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onRemove();
-                      setShowFieldMenu(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
+                    className="p-2 text-gray-400 hover:text-red-500
+                      hover:bg-red-50 rounded-xl transition-colors"
+                    aria-label="Eliminar campo"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Eliminar
+                    <TrashIcon className="h-5 w-5" />
                   </button>
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
+                    bg-gray-800 text-white text-xs rounded opacity-0 group-hover/tooltip:opacity-100 
+                    transition-opacity duration-150 whitespace-nowrap pointer-events-none">
+                    Eliminar campo
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
-      
-      {!isActive && (
-        <div className="bg-gray-50 border-t border-gray-200 p-3">
-          <FormInput
-            field={field}
-            value=""
-            onChange={() => {}}
-            error=""
-            disabled
-          />
+
+      {/* Menú contextual */}
+      {showMenu && !isActive && (
+        <div className="absolute right-4 top-full mt-2 w-48 
+          overflow-hidden rounded-2xl bg-white shadow-xl border border-gray-100 z-10"
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+              setShowMenu(false);
+            }}
+            className="w-full px-4 py-3 text-left hover:bg-gray-50 
+              flex items-start gap-3 text-gray-700"
+          >
+            <DocumentDuplicateIcon className="h-5 w-5" />
+            <span>Duplicar campo</span>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+              setShowMenu(false);
+            }}
+            className="w-full px-4 py-3 text-left hover:bg-red-50 
+              flex items-start gap-3 text-red-600"
+          >
+            <TrashIcon className="h-5 w-5" />
+            <span>Eliminar campo</span>
+          </button>
         </div>
       )}
     </div>

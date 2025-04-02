@@ -23,25 +23,11 @@ export const useFormBuilder = () => {
     isAddModalOpen: false,
   });
 
-  const getDefaultLabelForType = (type: FieldType): string => {
-    switch (type) {
-      case 'text': return 'Nombre completo';
-      case 'email': return 'Correo electrónico';
-      case 'phone': return 'Teléfono de contacto';
-      case 'number': return 'Edad';
-      case 'textarea': return 'Describa sus síntomas';
-      case 'select': return 'Seleccione una opción';
-      case 'radio': return '¿Ha tenido esta condición anteriormente?';
-      case 'date': return 'Fecha de nacimiento';
-      default: return 'Nueva pregunta';
-    }
-  };
-
   const addField = (type: FieldType) => {
     const newField: FormField = {
       id: Date.now(),
       type,
-      label: getDefaultLabelForType(type),
+      label: '',
       placeholder: 'Escriba aquí...',
       required: false,
       options: type === 'select' || type === 'radio' ? ['Opción 1', 'Opción 2'] : [],
