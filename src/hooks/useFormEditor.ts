@@ -102,7 +102,7 @@ export const useFormEditor = () => {
       id: Date.now(),
       type,
       label: '',
-      placeholder: 'Escriba aquí...',
+      placeholder: '',
       required: false,
       options: type === 'select' || type === 'radio' ? ['Opción 1', 'Opción 2'] : [],
     };

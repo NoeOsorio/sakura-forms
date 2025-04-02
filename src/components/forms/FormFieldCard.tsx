@@ -13,7 +13,8 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   CalculatorIcon,
-  CalendarDaysIcon
+  CalendarDaysIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface FormFieldCardProps {
@@ -30,7 +31,7 @@ interface FormFieldCardProps {
   className?: string;
 }
 
-type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'email' | 'tel' | 'number' | 'date';
+type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'email' | 'phone' | 'number' | 'date';
 
 type IconComponent = React.ForwardRefExoticComponent<
   Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
@@ -73,7 +74,7 @@ const fieldTypes: FieldConfig = {
     label: 'Email', 
     gradient: 'from-emerald-500 to-green-300'
   },
-  tel: { 
+  phone: { 
     icon: PhoneIcon, 
     label: 'Teléfono', 
     gradient: 'from-orange-500 to-amber-300'
@@ -140,20 +141,35 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
               {isActive ? (
                 <>
                   <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={field.label}
-                      onChange={(e) => onChange({ label: e.target.value })}
-                      className="w-full px-4 py-3 text-lg bg-transparent border-b-2 border-gray-200 
-                        focus:border-current focus:outline-none transition-colors placeholder-gray-400"
-                      placeholder="¿Qué quieres preguntar?"
-                      style={{ borderImage: `linear-gradient(to right, ${fieldConfig.gradient}) 1` }}
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={field.label}
+                        onChange={(e) => onChange({ label: e.target.value })}
+                        className="w-full px-4 py-3 text-lg bg-transparent border-b-2 border-gray-200 
+                          focus:border-current focus:outline-none transition-colors placeholder-gray-400"
+                        placeholder="¿Qué quieres preguntar?"
+                        style={{ borderImage: `linear-gradient(to right, ${fieldConfig.gradient}) 1` }}
+                      />
+                      <div className="absolute -top-2 right-0 text-xs text-gray-500">
+                        La pregunta que verá el usuario
+                      </div>
+                    </div>
                     
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700 text-left">
-                        Descripción del campo
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Descripción del campo
+                        </label>
+                        <div className="group relative">
+                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
+                          <div className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                            La descripción ayuda al usuario a entender qué información debe proporcionar. 
+                            Aparece debajo de la pregunta.
+                          </div>
+                        </div>
+                      </div>
                       <input
                         type="text"
                         value={field.description || ''}
@@ -165,22 +181,65 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                     </div>
                     
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-medium text-gray-700 text-left">
-                        Texto de ayuda (placeholder)
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="block text-sm font-medium text-gray-700 text-left">
+                          Texto de ejemplo (placeholder)
+                        </label>
+                        <div className="group relative">
+                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
+                          <div className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                            Este texto aparece dentro del campo cuando está vacío. 
+                            Sirve como ejemplo del formato esperado.
+                          </div>
+                        </div>
+                      </div>
                       <input
                         type="text"
                         value={field.placeholder || ''}
                         onChange={(e) => onChange({ placeholder: e.target.value })}
                         className="w-full px-4 py-2 text-gray-500 bg-gray-50/50 rounded-xl
                           focus:outline-none focus:bg-gray-50/80 transition-colors"
-                        placeholder="Describa su situación"
+                        placeholder={(() => {
+                          switch (field.type) {
+                            case 'text':
+                              return 'Ej: Escriba su respuesta aquí';
+                            case 'email':
+                              return 'Ej: usuario@dominio.com';
+                            case 'phone':
+                              return 'Ej: +34 612 345 678';
+                            case 'number':
+                              return 'Ej: Ingrese un número';
+                            case 'date':
+                              return 'Ej: DD/MM/AAAA';
+                            case 'textarea':
+                              return 'Ej: Escriba su respuesta detallada aquí';
+                            case 'select':
+                            case 'radio':
+                              return 'Ej: Seleccione una opción';
+                            default:
+                              return 'Escriba aquí...';
+                          }
+                        })()}
                       />
                     </div>
                   </div>
 
                   {(field.type === 'select' || field.type === 'radio') && (
                     <div className="space-y-3 pt-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium text-gray-700">
+                          Opciones disponibles
+                        </div>
+                        <div className="group relative">
+                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
+                          <div className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                            Define las opciones entre las que el usuario podrá elegir. 
+                            Se recomienda incluir al menos 2 opciones.
+                          </div>
+                        </div>
+                      </div>
                       {field.options?.map((option, index) => (
                         <div key={index} className="group/option flex items-center gap-3 bg-gray-50/50 rounded-xl p-2">
                           <div className={`
@@ -239,19 +298,31 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                   )}
 
                   <div className="flex items-start gap-3 pt-4">
-                    <input
-                      type="checkbox"
-                      id={`required-${field.id}`}
-                      checked={field.required}
-                      onChange={(e) => onChange({ required: e.target.checked })}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    <label 
-                      htmlFor={`required-${field.id}`}
-                      className="text-sm text-gray-600"
-                    >
-                      Campo requerido
-                    </label>
+                    <div className="group relative">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          id={`required-${field.id}`}
+                          checked={field.required}
+                          onChange={(e) => onChange({ required: e.target.checked })}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <label 
+                          htmlFor={`required-${field.id}`}
+                          className="text-sm text-gray-600"
+                        >
+                          Campo requerido
+                        </label>
+                        <div className="group relative">
+                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
+                          <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                            Si esta opción está marcada, el usuario deberá completar este campo obligatoriamente 
+                            antes de poder enviar el formulario.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </>
               ) : (
@@ -303,7 +374,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                         </div>
                       )}
                       
-                      {(field.type as FieldType) === 'tel' && (
+                      {(field.type as FieldType) === 'phone' && (
                         <div className="text-gray-500">
                           <span className="font-medium">Formato:</span> +1234567890
                         </div>
