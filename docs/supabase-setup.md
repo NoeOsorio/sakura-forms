@@ -7,16 +7,29 @@
 npm install -g supabase
 ```
 
-2. Tener una cuenta en Supabase y un proyecto creado
+2. Iniciar sesión en Supabase CLI:
+```bash
+supabase login
+```
+   - Esto abrirá tu navegador para autenticarte
+   - Necesitarás tu token de acceso de Supabase (se encuentra en Account Settings > Access Tokens)
+
+3. Tener una cuenta en Supabase y un proyecto creado
 
 ## Configuración del Proyecto
 
-1. Obtener las credenciales del proyecto:
+1. Vincular el proyecto local con Supabase:
+```bash
+supabase link --project-ref [project-ref]
+```
+   - El project-ref se encuentra en Project Settings > General > Reference ID
+
+2. Obtener las credenciales del proyecto:
    - URL del proyecto: `https://[project-ref].supabase.co`
    - Clave anónima: Se encuentra en Project Settings > API > Project API keys > anon public
    - Contraseña de la base de datos: Project Settings > Database > Connection string > Password
 
-2. Configurar el archivo `.env`:
+3. Configurar el archivo `.env`:
 ```env
 VITE_SUPABASE_URL=https://[project-ref].supabase.co
 VITE_SUPABASE_ANON_KEY=tu_anon_key

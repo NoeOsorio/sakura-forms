@@ -29,17 +29,33 @@ Sakura Forms es una aplicación moderna y elegante para la creación y gestión 
 
 ## 🚀 Instalación
 
+## Requisitos
+
+- Node.js 18+
+- npm o yarn
+- Cuenta en Supabase
+
+## Configuración
+
+### 1. Instalar dependencias
 ```bash
-# Clonar el repositorio
-git clone https://github.com/NoeOsorio/sakura-forms.git
-
-# Entrar al directorio
-cd sakura-forms
-
-# Instalar dependencias
 npm install
+```
 
-# Iniciar el servidor de desarrollo
+### 2. Configurar Supabase
+Para la configuración completa de Supabase, incluyendo autenticación, base de datos y migraciones, consulta la [documentación detallada](./docs/supabase-setup.md).
+
+Pasos básicos:
+1. Instalar CLI de Supabase: `npm install -g supabase`
+2. Iniciar sesión: `supabase login`
+3. Vincular proyecto: `supabase link --project-ref [project-ref]`
+4. Configurar variables de entorno (ver `.env.example`)
+
+### 3. Configurar Autenticación con Google
+Para habilitar el inicio de sesión con Google, sigue las instrucciones en la [documentación de Google OAuth](./docs/google-oauth-setup.md).
+
+### 4. Iniciar el servidor de desarrollo
+```bash
 npm run dev
 ```
 
