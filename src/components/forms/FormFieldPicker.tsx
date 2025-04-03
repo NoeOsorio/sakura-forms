@@ -1,23 +1,26 @@
-// Define the field types
-type FieldType = 
-  | 'text' 
-  | 'email' 
-  | 'phone' 
-  | 'number' 
-  | 'checkbox' 
-  | 'radio' 
-  | 'select' 
-  | 'textarea' 
-  | 'date'
-  | 'scale'
-  | 'file'
-  | 'signature';
+import { 
+  DocumentTextIcon,
+  ChatBubbleBottomCenterTextIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  CalculatorIcon,
+  CalendarDaysIcon,
+  CheckIcon,
+  ListBulletIcon,
+  ChevronDownIcon,
+  StarIcon,
+  PaperClipIcon,
+  PencilIcon
+} from '@heroicons/react/24/outline';
+
+import { FieldType } from '../../types';
 
 interface FieldOption {
   type: FieldType;
   label: string;
-  icon: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   description: string;
+  color: string;
 }
 
 interface FormFieldPickerProps {
@@ -30,74 +33,86 @@ const FormFieldPicker = ({ onSelect }: FormFieldPickerProps) => {
     { 
       type: 'text', 
       label: 'Texto', 
-      icon: 'Aa', 
-      description: 'Campo de texto corto' 
+      icon: DocumentTextIcon, 
+      description: 'Campo de texto corto',
+      color: 'text-blue-600 bg-blue-50'
     },
     { 
       type: 'textarea', 
       label: 'Texto largo', 
-      icon: '¶', 
-      description: 'Respuesta en párrafos' 
+      icon: ChatBubbleBottomCenterTextIcon, 
+      description: 'Respuesta en párrafos',
+      color: 'text-purple-600 bg-purple-50'
     },
     { 
       type: 'email', 
       label: 'Email', 
-      icon: '✉️', 
-      description: 'Correo electrónico' 
+      icon: EnvelopeIcon, 
+      description: 'Correo electrónico',
+      color: 'text-green-600 bg-green-50'
     },
     { 
       type: 'phone', 
       label: 'Teléfono', 
-      icon: '📱', 
-      description: 'Número telefónico' 
+      icon: PhoneIcon, 
+      description: 'Número telefónico',
+      color: 'text-orange-600 bg-orange-50'
     },
     { 
       type: 'number', 
       label: 'Número', 
-      icon: '#', 
-      description: 'Valor numérico' 
+      icon: CalculatorIcon, 
+      description: 'Valor numérico',
+      color: 'text-red-600 bg-red-50'
     },
     { 
       type: 'date', 
       label: 'Fecha', 
-      icon: '📅', 
-      description: 'Selector de fecha' 
+      icon: CalendarDaysIcon, 
+      description: 'Selector de fecha',
+      color: 'text-teal-600 bg-teal-50'
     },
     { 
       type: 'checkbox', 
       label: 'Casillas', 
-      icon: '☑️', 
-      description: 'Selección múltiple' 
+      icon: CheckIcon, 
+      description: 'Selección múltiple',
+      color: 'text-indigo-600 bg-indigo-50'
     },
     { 
       type: 'radio', 
       label: 'Opción única', 
-      icon: '⭕', 
-      description: 'Selección única' 
+      icon: ListBulletIcon, 
+      description: 'Selección única',
+      color: 'text-rose-600 bg-rose-50'
     },
     { 
       type: 'select', 
       label: 'Desplegable', 
-      icon: '▼', 
-      description: 'Lista de opciones' 
+      icon: ChevronDownIcon, 
+      description: 'Lista de opciones',
+      color: 'text-fuchsia-600 bg-fuchsia-50'
     },
     { 
       type: 'scale', 
       label: 'Escala', 
-      icon: '⭐', 
-      description: 'Valoración 1-10' 
+      icon: StarIcon, 
+      description: 'Valoración 1-10',
+      color: 'text-amber-600 bg-amber-50'
     },
     { 
       type: 'file', 
       label: 'Archivo', 
-      icon: '📎', 
-      description: 'Subir documentos' 
+      icon: PaperClipIcon, 
+      description: 'Subir documentos',
+      color: 'text-cyan-600 bg-cyan-50'
     },
     { 
       type: 'signature', 
       label: 'Firma', 
-      icon: '✍️', 
-      description: 'Firma digital' 
+      icon: PencilIcon, 
+      description: 'Firma digital',
+      color: 'text-emerald-600 bg-emerald-50'
     },
   ];
 
@@ -111,68 +126,42 @@ const FormFieldPicker = ({ onSelect }: FormFieldPickerProps) => {
   const advancedFields = fieldOptions.filter(f => 
     ['date', 'scale', 'file', 'signature'].includes(f.type));
 
+  const renderField = (field: FieldOption) => (
+    <button
+      key={field.type}
+      onClick={() => onSelect(field.type)}
+      className="flex items-center p-3 hover:bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-all"
+    >
+      <span className={`flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg mr-3 ${field.color}`}>
+        <field.icon className="w-5 h-5" />
+      </span>
+      <div className="flex-1 text-left">
+        <p className="font-medium text-gray-800">{field.label}</p>
+        <p className="text-xs text-gray-500 line-clamp-2">{field.description}</p>
+      </div>
+    </button>
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Campos básicos</h3>
-        <div className="space-y-2">
-          {basicFields.map((field) => (
-            <button
-              key={field.type}
-              onClick={() => onSelect(field.type)}
-              className="w-full flex items-center p-2 hover:bg-teal-50 rounded-md text-left transition-colors"
-            >
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-teal-100 text-teal-700 rounded mr-2">
-                {field.icon}
-              </span>
-              <div>
-                <p className="font-medium text-gray-800">{field.label}</p>
-                <p className="text-xs text-gray-500">{field.description}</p>
-              </div>
-            </button>
-          ))}
+        <h3 className="text-sm font-medium text-gray-700 mb-4">Campos básicos</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {basicFields.map(renderField)}
         </div>
       </div>
       
       <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Selección</h3>
-        <div className="space-y-2">
-          {choiceFields.map((field) => (
-            <button
-              key={field.type}
-              onClick={() => onSelect(field.type)}
-              className="w-full flex items-center p-2 hover:bg-teal-50 rounded-md text-left transition-colors"
-            >
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-purple-100 text-purple-700 rounded mr-2">
-                {field.icon}
-              </span>
-              <div>
-                <p className="font-medium text-gray-800">{field.label}</p>
-                <p className="text-xs text-gray-500">{field.description}</p>
-              </div>
-            </button>
-          ))}
+        <h3 className="text-sm font-medium text-gray-700 mb-4">Selección</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {choiceFields.map(renderField)}
         </div>
       </div>
       
       <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Avanzado</h3>
-        <div className="space-y-2">
-          {advancedFields.map((field) => (
-            <button
-              key={field.type}
-              onClick={() => onSelect(field.type)}
-              className="w-full flex items-center p-2 hover:bg-teal-50 rounded-md text-left transition-colors"
-            >
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-700 rounded mr-2">
-                {field.icon}
-              </span>
-              <div>
-                <p className="font-medium text-gray-800">{field.label}</p>
-                <p className="text-xs text-gray-500">{field.description}</p>
-              </div>
-            </button>
-          ))}
+        <h3 className="text-sm font-medium text-gray-700 mb-4">Avanzado</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {advancedFields.map(renderField)}
         </div>
       </div>
     </div>

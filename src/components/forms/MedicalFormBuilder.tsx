@@ -3,7 +3,7 @@ import FormHeader from './FormHeader';
 import FormTitleEditor from './FormTitleEditor';
 import FormFieldCard from './FormFieldCard';
 import MedicalFormPreview from './MedicalFormPreview';
-import FieldTypePicker from './FieldTypePicker';
+import FormFieldPicker from './FormFieldPicker';
 import Modal from '../shared/Modal';
 
 const MedicalFormBuilder = () => {
@@ -122,7 +122,7 @@ const MedicalFormBuilder = () => {
         onClose={() => toggleAddModal(false)}
         title="Agregar campo"
       >
-        <FieldTypePicker onSelect={addField} />
+        <FormFieldPicker onSelect={addField} />
       </Modal>
     </div>
   );

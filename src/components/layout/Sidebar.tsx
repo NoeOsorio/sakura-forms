@@ -1,4 +1,13 @@
 import { Link } from 'react-router-dom';
+import {
+  HomeIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  DocumentDuplicateIcon,
+  Cog6ToothIcon,
+  XMarkIcon,
+  UserCircleIcon
+} from '@heroicons/react/24/outline';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -7,11 +16,11 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const navItems = [
-    { name: 'Inicio', icon: '🏠', path: '/' },
-    { name: 'Mis Formularios', icon: '📝', path: '/forms' },
-    { name: 'Respuestas', icon: '📊', path: '/responses' },
-    { name: 'Plantillas', icon: '📋', path: '/templates' },
-    { name: 'Configuración', icon: '⚙️', path: '/settings' },
+    { name: 'Inicio', icon: HomeIcon, path: '/' },
+    { name: 'Mis Formularios', icon: DocumentTextIcon, path: '/forms' },
+    { name: 'Respuestas', icon: ChartBarIcon, path: '/responses' },
+    { name: 'Plantillas', icon: DocumentDuplicateIcon, path: '/templates' },
+    { name: 'Configuración', icon: Cog6ToothIcon, path: '/settings' },
   ];
 
   return (
@@ -26,10 +35,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
         </div>
         <button 
           onClick={toggleSidebar}
-          className="text-gray-500 hover:text-gray-700 focus:outline-none"
+          className="text-gray-500 hover:text-gray-700 focus:outline-none p-1 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Cerrar menú"
         >
-          ✕
+          <XMarkIcon className="w-5 h-5" />
         </button>
       </div>
       
@@ -39,10 +48,10 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             <li key={item.name} className="px-3">
               <Link 
                 to={item.path} 
-                className="flex items-center py-3 px-4 rounded-md hover:bg-gray-100 transition-colors text-gray-700 font-medium"
+                className="flex items-center py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 font-medium group"
                 onClick={toggleSidebar}
               >
-                <span className="text-xl mr-3 text-teal-600">{item.icon}</span>
+                <item.icon className="w-5 h-5 mr-3 text-teal-600 group-hover:text-teal-700 transition-colors" />
                 <span>{item.name}</span>
               </Link>
             </li>
@@ -52,8 +61,8 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
       
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
         <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-semibold">
-            U
+          <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
+            <UserCircleIcon className="w-6 h-6" />
           </div>
           <div className="ml-3">
             <p className="font-medium text-gray-700">Usuario</p>

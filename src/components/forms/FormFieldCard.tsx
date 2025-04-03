@@ -5,7 +5,6 @@ import {
   DocumentDuplicateIcon, 
   ChevronUpIcon, 
   ChevronDownIcon,
-  PlusIcon,
   DocumentTextIcon,
   ChatBubbleBottomCenterTextIcon,
   ListBulletIcon,
@@ -31,7 +30,7 @@ interface FormFieldCardProps {
   className?: string;
 }
 
-type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'email' | 'phone' | 'number' | 'date';
+type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'email' | 'phone' | 'number' | 'date' | 'checkbox' | 'scale' | 'file' | 'signature';
 
 type IconComponent = React.ForwardRefExoticComponent<
   Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
@@ -88,6 +87,26 @@ const fieldTypes: FieldConfig = {
     icon: CalendarDaysIcon, 
     label: 'Fecha', 
     gradient: 'from-teal-500 to-cyan-300'
+  },
+  checkbox: { 
+    icon: CheckCircleIcon, 
+    label: 'Checkbox', 
+    gradient: 'from-emerald-500 to-green-300'
+  },
+  scale: { 
+    icon: InformationCircleIcon, 
+    label: 'Escala', 
+    gradient: 'from-teal-500 to-cyan-300'
+  },
+  file: { 
+    icon: DocumentTextIcon, 
+    label: 'Archivo', 
+    gradient: 'from-blue-500 to-cyan-300'
+  },
+  signature: { 
+    icon: InformationCircleIcon, 
+    label: 'Firma', 
+    gradient: 'from-teal-500 to-cyan-300'
   }
 };
 
@@ -107,6 +126,197 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
   const [showMenu, setShowMenu] = useState(false);
   const fieldConfig = fieldTypes[field.type as FieldType] || fieldTypes.text;
   const IconComponent = fieldConfig.icon;
+
+  const renderFieldProperties = () => {
+    const commonProperties = (
+      <>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700 text-left">
+            Pregunta
+          </label>
+          <input
+            type="text"
+            value={field.label}
+            onChange={(e) => onChange({ label: e.target.value })}
+            placeholder="¿Cuál es tu pregunta?"
+            className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
+          />
+        </div>
+
+        {field.type !== 'checkbox' && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700 text-left">
+              Descripción (opcional)
+            </label>
+            <input
+              type="text"
+              value={field.description || ''}
+              onChange={(e) => onChange({ description: e.target.value })}
+              placeholder="Añade un texto de ayuda"
+              className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
+            />
+          </div>
+        )}
+
+        {!['checkbox', 'radio', 'select', 'file', 'signature'].includes(field.type) && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700 text-left">
+              Placeholder
+            </label>
+            <input
+              type="text"
+              value={field.placeholder || ''}
+              onChange={(e) => onChange({ placeholder: e.target.value })}
+              placeholder="Texto de ejemplo"
+              className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
+            />
+          </div>
+        )}
+      </>
+    );
+
+    const renderSpecificProperties = () => {
+      switch (field.type) {
+        case 'radio':
+        case 'select':
+          return (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700 text-left flex items-center justify-between">
+                <span>Opciones</span>
+                <button
+                  type="button"
+                  onClick={() => onChange({ options: [...(field.options || []), ''] })}
+                  className="text-sm text-teal-600 hover:text-teal-700"
+                >
+                  Agregar opción
+                </button>
+              </label>
+              <div className="space-y-2">
+                {field.options?.map((option, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => {
+                        const newOptions = [...(field.options || [])];
+                        newOptions[index] = e.target.value;
+                        onChange({ options: newOptions });
+                      }}
+                      placeholder={`Opción ${index + 1}`}
+                      className="flex-1 p-2 border border-gray-200 rounded-lg bg-white/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newOptions = [...(field.options || [])];
+                        newOptions.splice(index, 1);
+                        onChange({ options: newOptions });
+                      }}
+                      className="p-1 text-red-500 hover:text-red-600 hover:bg-red-50 rounded"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+
+        case 'scale':
+          return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700 text-left">
+                    Valor mínimo
+                  </label>
+                  <input
+                    type="number"
+                    value={field.minValue || 1}
+                    onChange={(e) => onChange({ minValue: parseInt(e.target.value) })}
+                    min="0"
+                    max="100"
+                    className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700 text-left">
+                    Valor máximo
+                  </label>
+                  <input
+                    type="number"
+                    value={field.maxValue || 10}
+                    onChange={(e) => onChange({ maxValue: parseInt(e.target.value) })}
+                    min="0"
+                    max="100"
+                    className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
+                  />
+                </div>
+              </div>
+            </div>
+          );
+
+        case 'file':
+          return (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700 text-left">
+                Tipos de archivo permitidos
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {['image/*', 'application/pdf', '.doc,.docx', '.xls,.xlsx'].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      const currentTypes = field.allowedTypes || [];
+                      const newTypes = currentTypes.includes(type)
+                        ? currentTypes.filter(t => t !== type)
+                        : [...currentTypes, type];
+                      onChange({ allowedTypes: newTypes });
+                    }}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      (field.allowedTypes || []).includes(type)
+                        ? 'bg-teal-100 text-teal-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {type === 'image/*' ? 'Imágenes'
+                      : type === 'application/pdf' ? 'PDF'
+                      : type === '.doc,.docx' ? 'Word'
+                      : 'Excel'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        {commonProperties}
+        {renderSpecificProperties()}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id={`required-${field.id}`}
+            checked={field.required || false}
+            onChange={(e) => onChange({ required: e.target.checked })}
+            className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+          />
+          <label
+            htmlFor={`required-${field.id}`}
+            className="ml-2 block text-sm text-gray-700"
+          >
+            Campo requerido
+          </label>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div 
@@ -140,190 +350,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
             <div className="flex-1 min-w-0 space-y-6">
               {isActive ? (
                 <>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={field.label}
-                        onChange={(e) => onChange({ label: e.target.value })}
-                        className="w-full px-4 py-3 text-lg bg-transparent border-b-2 border-gray-200 
-                          focus:border-current focus:outline-none transition-colors placeholder-gray-400"
-                        placeholder="¿Qué quieres preguntar?"
-                        style={{ borderImage: `linear-gradient(to right, ${fieldConfig.gradient}) 1` }}
-                      />
-                      <div className="absolute -top-2 right-0 text-xs text-gray-500">
-                        La pregunta que verá el usuario
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-sm font-medium text-gray-700 text-left">
-                          Descripción del campo
-                        </label>
-                        <div className="group relative">
-                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
-                          <div className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                            La descripción ayuda al usuario a entender qué información debe proporcionar. 
-                            Aparece debajo de la pregunta.
-                          </div>
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        value={field.description || ''}
-                        onChange={(e) => onChange({ description: e.target.value })}
-                        className="w-full px-4 py-2 text-gray-500 bg-gray-50/50 rounded-xl
-                          focus:outline-none focus:bg-gray-50/80 transition-colors"
-                        placeholder="Explica qué debe ingresar el usuario..."
-                      />
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-sm font-medium text-gray-700 text-left">
-                          Texto de ejemplo (placeholder)
-                        </label>
-                        <div className="group relative">
-                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
-                          <div className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                            Este texto aparece dentro del campo cuando está vacío. 
-                            Sirve como ejemplo del formato esperado.
-                          </div>
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        value={field.placeholder || ''}
-                        onChange={(e) => onChange({ placeholder: e.target.value })}
-                        className="w-full px-4 py-2 text-gray-500 bg-gray-50/50 rounded-xl
-                          focus:outline-none focus:bg-gray-50/80 transition-colors"
-                        placeholder={(() => {
-                          switch (field.type) {
-                            case 'text':
-                              return 'Ej: Escriba su respuesta aquí';
-                            case 'email':
-                              return 'Ej: usuario@dominio.com';
-                            case 'phone':
-                              return 'Ej: +34 612 345 678';
-                            case 'number':
-                              return 'Ej: Ingrese un número';
-                            case 'date':
-                              return 'Ej: DD/MM/AAAA';
-                            case 'textarea':
-                              return 'Ej: Escriba su respuesta detallada aquí';
-                            case 'select':
-                            case 'radio':
-                              return 'Ej: Seleccione una opción';
-                            default:
-                              return 'Escriba aquí...';
-                          }
-                        })()}
-                      />
-                    </div>
-                  </div>
-
-                  {(field.type === 'select' || field.type === 'radio') && (
-                    <div className="space-y-3 pt-2">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium text-gray-700">
-                          Opciones disponibles
-                        </div>
-                        <div className="group relative">
-                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
-                          <div className="absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                            Define las opciones entre las que el usuario podrá elegir. 
-                            Se recomienda incluir al menos 2 opciones.
-                          </div>
-                        </div>
-                      </div>
-                      {field.options?.map((option, index) => (
-                        <div key={index} className="group/option flex items-center gap-3 bg-gray-50/50 rounded-xl p-2">
-                          <div className={`
-                            w-7 h-7 rounded-full bg-gradient-to-br ${fieldConfig.gradient}
-                            flex items-center justify-center shadow-sm
-                          `}>
-                            <span className="text-sm font-medium text-white">{index + 1}</span>
-                          </div>
-                          <input
-                            type="text"
-                            value={option}
-                            onChange={(e) => {
-                              const newOptions = [...(field.options || [])];
-                              newOptions[index] = e.target.value;
-                              onChange({ options: newOptions });
-                            }}
-                            className="flex-1 px-3 py-2 bg-white/50 rounded-lg border-0
-                              focus:outline-none focus:ring-1 ring-gray-200 text-gray-700"
-                            placeholder={`Opción ${index + 1}`}
-                          />
-                          <div className="group/tooltip relative">
-                            <button
-                              onClick={() => {
-                                const newOptions = field.options?.filter((_, i) => i !== index) || [];
-                                onChange({ options: newOptions });
-                              }}
-                              className="opacity-0 group-hover/option:opacity-100 p-2 text-gray-400 
-                                hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
-                              aria-label="Eliminar opción"
-                            >
-                              <TrashIcon className="h-5 w-5" />
-                            </button>
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 
-                              bg-gray-800 text-white text-xs rounded opacity-0 group-hover/tooltip:opacity-100 
-                              transition-opacity duration-150 whitespace-nowrap pointer-events-none">
-                              Eliminar opción
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() => {
-                          const newOptions = [...(field.options || []), ''];
-                          onChange({ options: newOptions });
-                        }}
-                        className={`
-                          w-full flex items-center justify-center gap-2 px-4 py-2.5 
-                          text-sm font-medium rounded-xl bg-gradient-to-r ${fieldConfig.gradient} 
-                          text-white shadow-sm hover:shadow-md transition-all
-                        `}
-                      >
-                        <PlusIcon className="h-5 w-5" />
-                        Agregar opción
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-3 pt-4">
-                    <div className="group relative">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          id={`required-${field.id}`}
-                          checked={field.required}
-                          onChange={(e) => onChange({ required: e.target.checked })}
-                          className="h-4 w-4 rounded border-gray-300"
-                        />
-                        <label 
-                          htmlFor={`required-${field.id}`}
-                          className="text-sm text-gray-600"
-                        >
-                          Campo requerido
-                        </label>
-                        <div className="group relative">
-                          <InformationCircleIcon className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-help transition-colors" />
-                          <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-gray-800 text-white text-xs rounded 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                            Si esta opción está marcada, el usuario deberá completar este campo obligatoriamente 
-                            antes de poder enviar el formulario.
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {renderFieldProperties()}
                 </>
               ) : (
                 <>

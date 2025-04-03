@@ -3,7 +3,7 @@ import FormHeader from '../components/forms/FormHeader';
 import FormTitleEditor from '../components/forms/FormTitleEditor';
 import FormFieldCard from '../components/forms/FormFieldCard';
 import MedicalFormPreview from '../components/forms/MedicalFormPreview';
-import FieldTypePicker from '../components/forms/FieldTypePicker';
+import FormFieldPicker from '../components/forms/FormFieldPicker';
 import Modal from '../components/shared/Modal';
 import Button from '../components/shared/Button';
 
@@ -189,7 +189,7 @@ const EditFormPage = () => {
         onClose={() => toggleAddModal(false)}
         title="Agregar campo"
       >
-        <FieldTypePicker onSelect={addField} />
+        <FormFieldPicker onSelect={addField} />
       </Modal>
     </div>
   );

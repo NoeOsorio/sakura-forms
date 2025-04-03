@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'email' | 'number' | 'phone' | 'textarea' | 'date' | 'select' | 'radio';
+export type FieldType = 'text' | 'email' | 'number' | 'phone' | 'textarea' | 'date' | 'select' | 'radio' | 'checkbox' | 'scale' | 'file' | 'signature';
 
 export interface FormField {
   id: number;
@@ -8,6 +8,9 @@ export interface FormField {
   required?: boolean;
   options?: string[];
   description?: string;
+  minValue?: number;  // Para campos scale
+  maxValue?: number;  // Para campos scale
+  allowedTypes?: string[];  // Para campos file (e.g. ['image/*', 'application/pdf'])
 }
 
 export interface FormFieldPreviewProps {

@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
 import { FormField } from '../../types';
-import FormInput from './FormInput';
+import FormFieldPreview from './FormFieldPreview';
 import Button from '../shared/Button';
 import { validateField } from '../../validation/ValidationHelper';
+import {
+  UserIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  ListBulletIcon,
+  CheckCircleIcon,
+  StarIcon,
+  PaperClipIcon,
+  PencilIcon
+} from '@heroicons/react/24/outline';
 
 interface MedicalFormPreviewProps {
   title: string;
@@ -126,6 +138,14 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
       case 'select':
       case 'radio':
         return 'Selecciona la opción que mejor corresponda a tu situación.';
+      case 'checkbox':
+        return 'Marca esta casilla si la afirmación es correcta.';
+      case 'scale':
+        return 'Selecciona un valor en la escala que mejor represente tu respuesta.';
+      case 'file':
+        return 'Adjunta los documentos o imágenes relevantes para tu caso.';
+      case 'signature':
+        return 'Tu firma digital confirma la veracidad de la información proporcionada.';
       default:
         return '';
     }
@@ -135,48 +155,28 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
   const getFieldIcon = (type: string) => {
     switch (type) {
       case 'text':
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        );
+        return <UserIcon className="w-5 h-5" />;
       case 'email':
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        );
+        return <EnvelopeIcon className="w-5 h-5" />;
       case 'phone':
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-          </svg>
-        );
+        return <PhoneIcon className="w-5 h-5" />;
       case 'textarea':
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        );
+        return <DocumentTextIcon className="w-5 h-5" />;
       case 'date':
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        );
+        return <CalendarDaysIcon className="w-5 h-5" />;
       case 'select':
       case 'radio':
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-          </svg>
-        );
+        return <ListBulletIcon className="w-5 h-5" />;
+      case 'checkbox':
+        return <CheckCircleIcon className="w-5 h-5" />;
+      case 'scale':
+        return <StarIcon className="w-5 h-5" />;
+      case 'file':
+        return <PaperClipIcon className="w-5 h-5" />;
+      case 'signature':
+        return <PencilIcon className="w-5 h-5" />;
       default:
-        return (
-          <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
+        return <DocumentTextIcon className="w-5 h-5" />;
     }
   };
   
@@ -218,7 +218,7 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
                   </div>
                 </div>
                 
-                <FormInput
+                <FormFieldPreview
                   field={field}
                   value={values[field.id] || ''}
                   onChange={(value) => handleValueChange(field.id, value)}
@@ -251,7 +251,7 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
               <Button
                 variant="primary"
                 type="submit"
-                className="px-6 py-3"
+                className="px-8"
               >
                 Enviar formulario
               </Button>
