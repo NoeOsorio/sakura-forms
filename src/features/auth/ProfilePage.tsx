@@ -1,7 +1,37 @@
+import { useState } from 'react'
 import { useAuth } from './AuthProvider'
 
 export function ProfilePage() {
   const { user } = useAuth()
+  const [imageError, setImageError] = useState(false)
+  const userImage = !imageError ? (user?.user_metadata?.picture || user?.user_metadata?.avatar_url) : null
+  const userInitials = user?.email ? user.email.substring(0, 2).toUpperCase() : ''
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario'
+
+  const handleImageError = () => {
+    setImageError(true)
+  }
+
+  const renderAvatar = () => {
+    if (userImage) {
+      return (
+        <img
+          src={userImage}
+          alt="Avatar"
+          className="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover"
+          onError={handleImageError}
+        />
+      )
+    }
+
+    return (
+      <div className="h-24 w-24 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center">
+        <span className="text-3xl font-medium text-teal-600">
+          {userInitials}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -10,26 +40,14 @@ export function ProfilePage() {
           {/* Header con avatar grande */}
           <div className="relative h-32 bg-gradient-to-r from-teal-500 to-teal-600">
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-              {user?.user_metadata?.avatar_url ? (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="Avatar"
-                  className="h-24 w-24 rounded-full border-4 border-white shadow-lg"
-                />
-              ) : (
-                <div className="h-24 w-24 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center">
-                  <span className="text-3xl font-medium text-teal-600">
-                    {user?.email?.[0].toUpperCase()}
-                  </span>
-                </div>
-              )}
+              {renderAvatar()}
             </div>
           </div>
 
           {/* Contenido del perfil */}
           <div className="pt-16 pb-8 px-6 sm:px-8">
             <h3 className="text-center text-2xl font-bold text-gray-900 mb-8">
-              {user?.user_metadata?.full_name || 'Usuario'}
+              {userName}
             </h3>
 
             <div className="max-w-xl mx-auto space-y-6">
@@ -62,7 +80,7 @@ export function ProfilePage() {
                     Nombre
                   </p>
                   <p className="text-base text-gray-900">
-                    {user?.user_metadata?.full_name || 'No especificado'}
+                    {userName}
                   </p>
                 </div>
               </div>

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../features/auth/AuthProvider'
+import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
 
 interface HeaderProps {
   isOpen: boolean;
@@ -8,8 +10,34 @@ interface HeaderProps {
 }
 
 const Header = ({ isOpen, toggleSidebar, title = 'Dashboard' }: HeaderProps) => {
-  const { user } = useAuth()
-  const userInitials = user?.email?.charAt(0).toUpperCase() || 'U'
+  const { user, signOut } = useAuth()
+  const [imageError, setImageError] = useState(false)
+  const userInitials = user?.email ? user.email.substring(0, 2).toUpperCase() : ''
+  const userImage = !imageError ? (user?.user_metadata?.picture || user?.user_metadata?.avatar_url) : null
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario'
+
+  const handleImageError = () => {
+    setImageError(true)
+  }
+
+  const renderAvatar = () => {
+    if (userImage) {
+      return (
+        <img 
+          src={userImage} 
+          alt="Profile" 
+          className="w-8 h-8 rounded-full object-cover"
+          onError={handleImageError}
+        />
+      )
+    }
+
+    return (
+      <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-medium text-sm">
+        {userInitials}
+      </div>
+    )
+  }
 
   return (
     <header className="bg-white border-b h-14 flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-30">
@@ -44,13 +72,21 @@ const Header = ({ isOpen, toggleSidebar, title = 'Dashboard' }: HeaderProps) => 
           to="/profile" 
           className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1"
         >
-          <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-medium text-sm">
-            {userInitials}
-          </div>
+          {renderAvatar()}
           <span className="text-sm font-medium text-gray-700 hidden md:block">
-            {user?.email}
+            {userName}
           </span>
         </Link>
+
+        <button
+          onClick={() => signOut()}
+          className="flex items-center space-x-1 text-gray-700 hover:text-gray-900"
+        >
+          <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+          <span className="hidden md:inline text-sm font-medium">
+            Cerrar sesión
+          </span>
+        </button>
       </div>
     </header>
   );

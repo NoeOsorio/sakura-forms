@@ -6,7 +6,6 @@ import {
   DocumentDuplicateIcon,
   Cog6ToothIcon,
   XMarkIcon,
-  UserCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -58,18 +57,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           ))}
         </ul>
       </nav>
-      
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-        <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
-            <UserCircleIcon className="w-6 h-6" />
-          </div>
-          <div className="ml-3">
-            <p className="font-medium text-gray-700">Usuario</p>
-            <p className="text-xs text-gray-500">usuario@ejemplo.com</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
