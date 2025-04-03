@@ -20,13 +20,15 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create forms table
 CREATE TABLE forms (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
-  is_template BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+  fields JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  is_template BOOLEAN DEFAULT false NOT NULL,
+  category TEXT
 );
 
 -- Create form_fields table
@@ -47,57 +49,40 @@ CREATE TABLE form_fields (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
--- Create responses table
-CREATE TABLE responses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  form_id UUID REFERENCES forms(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  patient_name TEXT NOT NULL,
-  patient_email TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending',
-  completed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
-);
-
--- Create response_values table
-CREATE TABLE response_values (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  response_id UUID REFERENCES responses(id) ON DELETE CASCADE,
-  field_id UUID REFERENCES form_fields(id) ON DELETE CASCADE,
-  value TEXT,
-  file_url TEXT, -- For file fields
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+-- Create form_responses table
+CREATE TABLE form_responses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  form_id UUID NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  responses JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Create indexes
-CREATE INDEX idx_forms_user_id ON forms(user_id);
+CREATE INDEX forms_user_id_idx ON forms(user_id);
+CREATE INDEX forms_is_template_idx ON forms(is_template);
+CREATE INDEX form_responses_form_id_idx ON form_responses(form_id);
+CREATE INDEX form_responses_user_id_idx ON form_responses(user_id);
 CREATE INDEX idx_form_fields_form_id ON form_fields(form_id);
-CREATE INDEX idx_responses_form_id ON responses(form_id);
-CREATE INDEX idx_responses_user_id ON responses(user_id);
-CREATE INDEX idx_response_values_response_id ON response_values(response_id);
-CREATE INDEX idx_response_values_field_id ON response_values(field_id);
 
 -- Create RLS policies
 ALTER TABLE forms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE form_fields ENABLE ROW LEVEL SECURITY;
-ALTER TABLE responses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE response_values ENABLE ROW LEVEL SECURITY;
+ALTER TABLE form_responses ENABLE ROW LEVEL SECURITY;
 
 -- Forms policies
 CREATE POLICY "Users can view their own forms"
   ON forms FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can create forms"
+CREATE POLICY "Users can create their own forms"
   ON forms FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update their own forms"
   ON forms FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete their own forms"
   ON forms FOR DELETE
@@ -128,62 +113,46 @@ CREATE POLICY "Users can delete fields in their forms"
     SELECT 1 FROM forms WHERE forms.id = form_fields.form_id AND forms.user_id = auth.uid()
   ));
 
--- Responses policies
-CREATE POLICY "Users can view responses to their forms"
-  ON responses FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM forms WHERE forms.id = responses.form_id AND forms.user_id = auth.uid()
-  ));
+-- Form responses policies
+CREATE POLICY "Users can view their own responses"
+  ON form_responses FOR SELECT
+  USING (auth.uid() = user_id);
 
-CREATE POLICY "Anyone can create responses"
-  ON responses FOR INSERT
+CREATE POLICY "Users can create responses"
+  ON form_responses FOR INSERT
   WITH CHECK (true);
 
-CREATE POLICY "Users can update responses to their forms"
-  ON responses FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM forms WHERE forms.id = responses.form_id AND forms.user_id = auth.uid()
-  ));
+CREATE POLICY "Form owners can view all responses"
+  ON form_responses FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM forms
+      WHERE forms.id = form_responses.form_id
+      AND forms.user_id = auth.uid()
+    )
+  );
 
--- Response values policies
-CREATE POLICY "Users can view values of responses to their forms"
-  ON response_values FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM responses
-    JOIN forms ON forms.id = responses.form_id
-    WHERE responses.id = response_values.response_id AND forms.user_id = auth.uid()
-  ));
-
-CREATE POLICY "Anyone can create response values"
-  ON response_values FOR INSERT
-  WITH CHECK (true);
-
--- Create functions
-CREATE OR REPLACE FUNCTION update_updated_at()
+-- Create function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.updated_at = TIMEZONE('utc', NOW());
+  NEW.updated_at = timezone('utc'::text, now());
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ language 'plpgsql';
 
--- Create triggers
+-- Create triggers for updated_at
 CREATE TRIGGER update_forms_updated_at
   BEFORE UPDATE ON forms
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at();
+  EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_form_fields_updated_at
   BEFORE UPDATE ON form_fields
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at();
+  EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_responses_updated_at
-  BEFORE UPDATE ON responses
+CREATE TRIGGER update_form_responses_updated_at
+  BEFORE UPDATE ON form_responses
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at();
-
-CREATE TRIGGER update_response_values_updated_at
-  BEFORE UPDATE ON response_values
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at(); 
+  EXECUTE FUNCTION update_updated_at_column(); 

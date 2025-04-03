@@ -24,8 +24,9 @@ export const useFormBuilder = () => {
   });
 
   const addField = (type: FieldType) => {
+    const newId = Number(Date.now());
     const newField: FormField = {
-      id: Date.now(),
+      id: newId,
       type,
       label: '',
       placeholder: '',
@@ -103,9 +104,10 @@ export const useFormBuilder = () => {
   const duplicateField = (index: number) => {
     setState(prev => {
       const fieldToDuplicate = prev.fields[index];
+      const newId = Number(Date.now());
       const duplicatedField = {
         ...fieldToDuplicate,
-        id: Date.now(),
+        id: newId,
         label: `${fieldToDuplicate.label} (copia)`,
       };
       

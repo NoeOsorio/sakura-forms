@@ -1,81 +1,91 @@
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
+import { useAuth } from './useAuth';
+import { formService } from '../services/formService';
+import { Form, CreateFormInput, UpdateFormInput } from '../types/form';
 
-export interface Form {
-  id: number;
-  title: string;
-  description: string;
-  responseCount: number;
-  lastUpdated: string;
-  isActive: boolean;
-}
+export function useForms() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [selectedForm, setSelectedForm] = useState<Form | null>(null);
 
-// Mock data - Esto debería moverse a un servicio/API en el futuro
-const mockForms: Form[] = [
-  {
-    id: 1,
-    title: 'Evaluación inicial de paciente',
-    description: 'Formulario completo para la primera consulta con datos generales y antecedentes médicos.',
-    responseCount: 45,
-    lastUpdated: '2023-06-10',
-    isActive: true,
-  },
-  {
-    id: 2,
-    title: 'Seguimiento mensual de tratamiento',
-    description: 'Formulario para registrar la evolución del paciente durante su tratamiento.',
-    responseCount: 128,
-    lastUpdated: '2023-06-15',
-    isActive: true,
-  },
-  {
-    id: 3,
-    title: 'Encuesta de satisfacción',
-    description: 'Formulario para evaluar la satisfacción del paciente con el servicio recibido.',
-    responseCount: 87,
-    lastUpdated: '2023-06-12',
-    isActive: true,
-  },
-  {
-    id: 4,
-    title: 'Evaluación de dolor crónico',
-    description: 'Formulario especializado para pacientes con dolor crónico.',
-    responseCount: 32,
-    lastUpdated: '2023-06-08',
-    isActive: false,
-  },
-  {
-    id: 5,
-    title: 'Historia clínica wellness',
-    description: 'Formulario completo para registrar historial de salud y bienestar.',
-    responseCount: 18,
-    lastUpdated: '2023-06-05',
-    isActive: true,
-  },
-];
-
-export const useForms = () => {
-  const [forms] = useState<Form[]>(mockForms);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterActive, setFilterActive] = useState<boolean | null>(null);
-
-  const filteredForms = forms.filter(form => {
-    const matchesSearch = form.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         form.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterActive === null || form.isActive === filterActive;
-    return matchesSearch && matchesFilter;
+  // Obtener formularios del usuario
+  const { data: forms = [], isLoading: isLoadingForms } = useQuery({
+    queryKey: ['forms', user?.id],
+    queryFn: () => formService.getUserForms(user?.id || ''),
+    enabled: !!user?.id,
   });
 
-  const clearFilters = () => {
-    setSearchTerm('');
-    setFilterActive(null);
+  // Obtener plantillas
+  const { data: templates = [], isLoading: isLoadingTemplates } = useQuery({
+    queryKey: ['templates'],
+    queryFn: () => formService.getTemplates(),
+  });
+
+  // Crear formulario
+  const createFormMutation = useMutation({
+    mutationFn: (input: CreateFormInput) => formService.createForm(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['forms'] });
+      toast.success('Formulario creado exitosamente');
+    },
+    onError: (error) => {
+      toast.error('Error al crear el formulario');
+      console.error(error);
+    },
+  });
+
+  // Actualizar formulario
+  const updateFormMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateFormInput }) =>
+      formService.updateForm(id, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['forms'] });
+      toast.success('Formulario actualizado exitosamente');
+    },
+    onError: (error) => {
+      toast.error('Error al actualizar el formulario');
+      console.error(error);
+    },
+  });
+
+  // Eliminar formulario
+  const deleteFormMutation = useMutation({
+    mutationFn: (id: string) => formService.deleteForm(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['forms'] });
+      toast.success('Formulario eliminado exitosamente');
+    },
+    onError: (error) => {
+      toast.error('Error al eliminar el formulario');
+      console.error(error);
+    },
+  });
+
+  // Cargar formulario por ID
+  const loadForm = async (id: string) => {
+    try {
+      const form = await formService.getFormById(id);
+      setSelectedForm(form);
+    } catch (error) {
+      toast.error('Error al cargar el formulario');
+      console.error(error);
+    }
   };
 
   return {
-    forms: filteredForms,
-    searchTerm,
-    setSearchTerm,
-    filterActive,
-    setFilterActive,
-    clearFilters,
+    forms,
+    templates,
+    selectedForm,
+    isLoadingForms,
+    isLoadingTemplates,
+    createForm: createFormMutation.mutate,
+    updateForm: updateFormMutation.mutate,
+    deleteForm: deleteFormMutation.mutate,
+    loadForm,
+    isCreating: createFormMutation.isPending,
+    isUpdating: updateFormMutation.isPending,
+    isDeleting: deleteFormMutation.isPending,
   };
-}; 
+} 

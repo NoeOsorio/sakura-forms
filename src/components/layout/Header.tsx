@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../features/auth/AuthProvider'
+import { useAuth } from '../../hooks/useAuth'
 import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 
