@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Form, CreateFormInput, UpdateFormInput, FormResponse, FormField } from '../types/form';
+import { FormField as UIFormField, FieldType } from '../types';
 
 export const formService = {
   // Crear un nuevo formulario
@@ -260,4 +261,28 @@ export const formService = {
     if (error) throw error;
     return data;
   }
+};
+
+export const transformFormFieldsToUI = (fields: FormField[]): UIFormField[] => {
+  const validTypes: FieldType[] = [
+    'text', 'email', 'number', 'phone', 'textarea', 'date', 
+    'select', 'radio', 'checkbox', 'scale', 'file', 'signature'
+  ];
+
+  return fields.map((field, index) => {
+    const type = validTypes.includes(field.type as FieldType) ? field.type as FieldType : 'text';
+
+    return {
+      id: Number(field.id) || index + 1,
+      type,
+      label: field.label,
+      description: field.description,
+      required: field.required,
+      placeholder: field.placeholder || '',
+      options: field.options,
+      minValue: field.minValue,
+      maxValue: field.maxValue,
+      allowedTypes: field.allowedTypes,
+    };
+  });
 }; 

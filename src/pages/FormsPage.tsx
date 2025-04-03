@@ -17,7 +17,7 @@ const FormsPage = () => {
   } = useForms();
 
   const handleView = (id: number) => {
-    console.log(`Ver formulario ${id}`);
+    navigate(`/forms/view/${id}`);
   };
 
   const handleEdit = (id: number) => {

@@ -11,6 +11,7 @@ export interface FormField {
   maxValue?: number;
   allowedTypes?: string[];
   order: number;
+  placeholder?: string;
 }
 
 export interface Form {
