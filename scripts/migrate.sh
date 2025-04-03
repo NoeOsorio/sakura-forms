@@ -42,7 +42,7 @@ show_status() {
 # Función para aplicar las migraciones
 push_migrations() {
   echo "Pushing migrations to remote database..."
-  supabase db push --db-url "$SUPABASE_DB_URL"
+  supabase db push
 }
 
 # Procesar el comando
