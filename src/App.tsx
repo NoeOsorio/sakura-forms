@@ -1,49 +1,48 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, Outlet } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from './features/auth/AuthProvider'
+import { LoginPage } from './features/auth/LoginPage'
+import { RegisterPage } from './features/auth/RegisterPage'
+import { AuthCallbackPage } from './features/auth/AuthCallbackPage'
+import { ProfilePage } from './features/auth/ProfilePage'
 import MainLayout from './components/layout/MainLayout'
+import { ProtectedRoute } from './features/auth/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import FormsPage from './pages/FormsPage'
-import FormBuilderPage from './pages/FormBuilderPage'
-import EditFormPage from './pages/EditFormPage'
-import SettingsPage from './pages/SettingsPage'
-import ResponsesPage from './pages/ResponsesPage'
-import ResponseViewPage from './pages/ResponseViewPage'
 import TemplatesPage from './pages/TemplatesPage'
+import SettingsPage from './pages/SettingsPage'
 import './App.css'
 
-function App() {
-  const location = useLocation()
-  
-  // Get current page title based on route
-  const getPageTitle = () => {
-    const path = location.pathname
-    
-    if (path === '/') return 'Inicio'
-    if (path === '/forms') return 'Mis Formularios'
-    if (path.startsWith('/forms/new')) return 'Crear Formulario'
-    if (path.startsWith('/forms/edit/')) return 'Editar Formulario'
-    if (path === '/responses') return 'Respuestas'
-    if (path.startsWith('/responses/')) return 'Ver Respuesta'
-    if (path === '/templates') return 'Plantillas'
-    if (path === '/settings') return 'Configuración'
-    
-    return 'Sakura Forms'
-  }
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
+function App() {
   return (
-    <MainLayout title={getPageTitle()}>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/forms" element={<FormsPage />} />
-        <Route path="/forms/new" element={<FormBuilderPage isNew={true} />} />
-        <Route path="/forms/edit/:formId" element={<EditFormPage />} />
-        <Route path="/responses" element={<ResponsesPage />} />
-        <Route path="/responses/:responseId" element={<ResponseViewPage />} />
-        <Route path="/templates" element={<TemplatesPage />} />
-        <Route path="/templates/:templateId/use" element={<FormBuilderPage isNew={true} />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<div className="p-6 text-center">Página no encontrada</div>} />
-      </Routes>
-    </MainLayout>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<MainLayout><Outlet /></MainLayout>}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/forms" element={<FormsPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+          </Route>
+        </Routes>
+        <Toaster position="top-right" />
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

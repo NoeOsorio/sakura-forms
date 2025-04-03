@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+import { useAuth } from '../../features/auth/AuthProvider'
+
 interface HeaderProps {
   isOpen: boolean;
   toggleSidebar: () => void;
@@ -5,6 +8,9 @@ interface HeaderProps {
 }
 
 const Header = ({ isOpen, toggleSidebar, title = 'Dashboard' }: HeaderProps) => {
+  const { user } = useAuth()
+  const userInitials = user?.email?.charAt(0).toUpperCase() || 'U'
+
   return (
     <header className="bg-white border-b h-14 flex items-center justify-between px-4 fixed top-0 left-0 right-0 z-30">
       <div className="flex items-center">
@@ -34,11 +40,17 @@ const Header = ({ isOpen, toggleSidebar, title = 'Dashboard' }: HeaderProps) => 
           <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
         </button>
         
-        <div className="flex items-center">
+        <Link 
+          to="/profile" 
+          className="flex items-center space-x-2 hover:bg-gray-100 rounded-full p-1"
+        >
           <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-medium text-sm">
-            UN
+            {userInitials}
           </div>
-        </div>
+          <span className="text-sm font-medium text-gray-700 hidden md:block">
+            {user?.email}
+          </span>
+        </Link>
       </div>
     </header>
   );
