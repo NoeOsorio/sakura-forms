@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import Button from '../components/shared/Button';
 import FormsSearch from '../components/forms/FormsSearch';
@@ -6,7 +5,6 @@ import FormsList from '../components/forms/FormsList';
 import { useForms } from '../hooks/useForms';
 
 const FormsPage = () => {
-  const navigate = useNavigate();
   const {
     forms,
     searchTerm,
@@ -14,19 +12,9 @@ const FormsPage = () => {
     filterActive,
     setFilterActive,
     clearFilters,
+    deleteForm,
+    isDeleting,
   } = useForms();
-
-  const handleView = (id: number) => {
-    navigate(`/forms/view/${id}`);
-  };
-
-  const handleEdit = (id: number) => {
-    navigate(`/forms/edit/${id}`);
-  };
-
-  const handleDelete = (id: number) => {
-    console.log(`Eliminar formulario ${id}`);
-  };
 
   return (
     <div className="space-y-6">
@@ -46,10 +34,9 @@ const FormsPage = () => {
 
       <FormsList
         forms={forms}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={deleteForm}
         onClearFilters={clearFilters}
+        isDeleting={isDeleting}
       />
     </div>
   );

@@ -1,21 +1,19 @@
-import { Form } from '../../hooks/useForms';
+import { Form } from '../../types/form';
 import FormCard from './FormCard';
 import Button from '../shared/Button';
 
 interface FormsListProps {
   forms: Form[];
-  onView: (id: number) => void;
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
   onClearFilters: () => void;
+  isDeleting?: boolean;
 }
 
 const FormsList = ({
   forms,
-  onView,
-  onEdit,
   onDelete,
   onClearFilters,
+  isDeleting,
 }: FormsListProps) => {
   if (forms.length === 0) {
     return (
@@ -33,15 +31,9 @@ const FormsList = ({
       {forms.map((form) => (
         <FormCard
           key={form.id}
-          id={form.id}
-          title={form.title}
-          description={form.description}
-          responseCount={form.responseCount}
-          lastUpdated={form.lastUpdated}
-          isActive={form.isActive}
-          onView={onView}
-          onEdit={onEdit}
+          form={form}
           onDelete={onDelete}
+          isDeleting={isDeleting}
         />
       ))}
     </div>

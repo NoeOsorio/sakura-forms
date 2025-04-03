@@ -20,10 +20,6 @@ const FormViewPage: React.FC = () => {
     navigate('/forms');
   };
 
-  const handleBack = () => {
-    navigate('/forms');
-  };
-
   if (isLoading || !form) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -46,7 +42,7 @@ const FormViewPage: React.FC = () => {
           description={form.description || ''}
           fields={formattedFields}
           onComplete={handleComplete}
-          onBack={handleBack}
+          onBack={() => navigate('/forms')}
         />
       </div>
     </div>
