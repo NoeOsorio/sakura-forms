@@ -9,12 +9,22 @@ export function useForms() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterActive, setFilterActive] = useState<boolean | null>(null);
 
   // Obtener formularios del usuario
   const { data: forms = [], isLoading: isLoadingForms } = useQuery({
     queryKey: ['forms', user?.id],
     queryFn: () => formService.getUserForms(user?.id || ''),
     enabled: !!user?.id,
+  });
+
+  // Filtrar formularios según el término de búsqueda y el filtro de estado
+  const filteredForms = forms.filter(form => {
+    const matchesSearch = form.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         form.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterActive === null || form.is_active === filterActive;
+    return matchesSearch && matchesFilter;
   });
 
   // Obtener plantillas
@@ -74,10 +84,21 @@ export function useForms() {
     }
   };
 
+  // Limpiar filtros
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilterActive(null);
+  };
+
   return {
-    forms,
+    forms: filteredForms,
     templates,
     selectedForm,
+    searchTerm,
+    setSearchTerm,
+    filterActive,
+    setFilterActive,
+    clearFilters,
     isLoadingForms,
     isLoadingTemplates,
     createForm: createFormMutation.mutate,

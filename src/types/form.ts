@@ -22,6 +22,7 @@ export interface Form {
   updated_at: string;
   user_id: string;
   is_template: boolean;
+  is_active: boolean;
   category?: string;
 }
 
@@ -38,7 +39,9 @@ export interface CreateFormInput {
   title: string;
   description?: string;
   fields: Omit<FormField, 'id'>[];
+  user_id: string;
   is_template?: boolean;
+  is_active?: boolean;
   category?: string;
 }
 
@@ -47,5 +50,6 @@ export interface UpdateFormInput {
   description?: string;
   fields?: Omit<FormField, 'id'>[];
   is_template?: boolean;
+  is_active?: boolean;
   category?: string;
 } 

@@ -1,16 +1,4 @@
-export type FieldType = 
-  | 'text' 
-  | 'email' 
-  | 'phone' 
-  | 'number' 
-  | 'checkbox' 
-  | 'radio' 
-  | 'select' 
-  | 'textarea' 
-  | 'date'
-  | 'scale'
-  | 'file'
-  | 'signature';
+import { FieldType } from '../../types/field';
 
 export interface FormField {
   id: string;
@@ -22,6 +10,9 @@ export interface FormField {
   formatErrorMessage?: string;
   options?: string[];
   description?: string;
+  allowedTypes?: string[];
+  minValue?: number;
+  maxValue?: number;
 }
 
 export interface FormValues {

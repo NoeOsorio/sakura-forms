@@ -1,6 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FormField, FieldType } from '../types';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FormField } from '../components/forms/types';
+import { FieldType } from '../types/field';
+import { useAuth } from './useAuth';
+import { formService } from '../services/formService';
+import { toast } from 'react-hot-toast';
+import { CreateFormInput, UpdateFormInput } from '../types/form';
 
 export interface FormBuilderState {
   title: string;
@@ -13,6 +18,8 @@ export interface FormBuilderState {
 
 export const useFormBuilder = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { user } = useAuth();
   
   const [state, setState] = useState<FormBuilderState>({
     title: 'Formulario médico',
@@ -23,15 +30,45 @@ export const useFormBuilder = () => {
     isAddModalOpen: false,
   });
 
+  // Cargar formulario existente si hay un ID
+  useEffect(() => {
+    if (id && user) {
+      formService.getFormById(id)
+        .then(form => {
+          setState(prev => ({
+            ...prev,
+            title: form.title,
+            description: form.description || '',
+            fields: form.fields.map(field => ({
+              ...field,
+              placeholder: '',
+              errorMessage: '',
+              formatErrorMessage: '',
+            })),
+          }));
+        })
+        .catch(error => {
+          console.error('Error al cargar el formulario:', error);
+          toast.error('Error al cargar el formulario');
+        });
+    }
+  }, [id, user]);
+
   const addField = (type: FieldType) => {
-    const newId = Number(Date.now());
+    const newId = `field-${Date.now()}`;
     const newField: FormField = {
       id: newId,
       type,
       label: '',
       placeholder: '',
       required: false,
+      errorMessage: '',
+      formatErrorMessage: '',
       options: type === 'select' || type === 'radio' ? ['Opción 1', 'Opción 2'] : [],
+      description: '',
+      allowedTypes: type === 'file' ? ['image/*', 'application/pdf'] : undefined,
+      minValue: type === 'scale' ? 1 : undefined,
+      maxValue: type === 'scale' ? 10 : undefined,
     };
     
     setState(prev => {
@@ -104,7 +141,7 @@ export const useFormBuilder = () => {
   const duplicateField = (index: number) => {
     setState(prev => {
       const fieldToDuplicate = prev.fields[index];
-      const newId = Number(Date.now());
+      const newId = `field-${Date.now()}`;
       const duplicatedField = {
         ...fieldToDuplicate,
         id: newId,
@@ -122,9 +159,54 @@ export const useFormBuilder = () => {
     });
   };
 
-  const saveForm = () => {
-    console.log('Formulario guardado:', state);
-    navigate('/forms');
+  const saveForm = async () => {
+    if (!user) {
+      toast.error('Debes iniciar sesión para guardar el formulario');
+      return;
+    }
+
+    try {
+      console.log('Estado actual:', state);
+      
+      const formData = {
+        title: state.title,
+        description: state.description,
+        fields: state.fields.map(field => {
+          console.log('Campo antes de mapear:', field);
+          const mappedField = {
+            type: field.type,
+            label: field.label,
+            description: field.description,
+            placeholder: field.placeholder,
+            required: field.required,
+            options: field.options,
+            allowedTypes: field.allowedTypes,
+            minValue: field.minValue,
+            maxValue: field.maxValue,
+            order: state.fields.indexOf(field),
+          };
+          console.log('Campo después de mapear:', mappedField);
+          return mappedField;
+        }),
+        user_id: user.id,
+        is_active: true,
+      };
+
+      console.log('Payload completo:', formData);
+
+      if (id) {
+        await formService.updateForm(id, formData as UpdateFormInput);
+        toast.success('Formulario actualizado exitosamente');
+      } else {
+        await formService.createForm(formData as CreateFormInput);
+        toast.success('Formulario creado exitosamente');
+      }
+
+      navigate('/forms');
+    } catch (error) {
+      console.error('Error al guardar el formulario:', error);
+      toast.error('Error al guardar el formulario');
+    }
   };
 
   const togglePreview = () => {
