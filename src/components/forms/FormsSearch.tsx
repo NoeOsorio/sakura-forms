@@ -17,8 +17,8 @@ const FormsSearch = ({
 }: FormsSearchProps) => {
   return (
     <Card>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        <div className="w-full md:w-64">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <div className="w-full sm:w-80">
           <SearchBar
             value={searchTerm}
             onChange={onSearchChange}
@@ -26,7 +26,7 @@ const FormsSearch = ({
           />
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <FilterButton 
             isActive={filterActive === null}
             onClick={() => onFilterChange(null)}

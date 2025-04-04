@@ -15,6 +15,7 @@ import TemplatesPage from './pages/TemplatesPage'
 import SettingsPage from './pages/SettingsPage'
 import FormViewPage from './pages/FormViewPage'
 import './App.css'
+import ResponsesPage from './pages/ResponsesPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/forms/new" element={<MedicalFormBuilder />} />
               <Route path="/forms/:id" element={<MedicalFormBuilder />} />
               <Route path="/forms/view/:id" element={<FormViewPage />} />
+              <Route path="/responses" element={<ResponsesPage />} />
               <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/profile" element={<ProfilePage />} />

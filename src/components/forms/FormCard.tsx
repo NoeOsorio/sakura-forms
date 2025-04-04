@@ -4,6 +4,13 @@ import { Form } from '../../types/form';
 import Modal from '../shared/Modal';
 import Button from '../shared/Button';
 import Card from '../shared/Card';
+import { 
+  ChartBarIcon, 
+  ClockIcon, 
+  EyeIcon,
+  PencilIcon,
+  TrashIcon
+} from '@heroicons/react/24/outline';
 
 interface FormCardProps {
   form: Form;
@@ -32,71 +39,91 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
     setShowDeleteModal(false);
   };
 
+  const cardStyles = {
+    textAlign: 'left' as const,
+  };
+
+  const buttonStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '100%',
+    textAlign: 'left' as const,
+  };
+
+  const iconButtonStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 'auto',
+  };
+
   return (
     <>
       <Card 
         variant="raised" 
         padding="none"
-        className={`overflow-hidden transition-all hover:translate-y-[-2px] ${form.is_active ? 'border-l-4 border-l-indigo-500' : 'border-l-4 border-l-gray-300'}`}
+        className={`overflow-hidden transition-all hover:translate-y-[-2px] ${form.is_active ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-gray-300'}`}
       >
-        <div className="p-5">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">{form.title}</h3>
+        <div className="p-6" style={cardStyles}>
+          {/* Header */}
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1" style={cardStyles}>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">{form.title}</h3>
               {form.description && (
-                <p className="text-gray-600 text-sm mb-3">{form.description}</p>
+                <p className="text-sm text-gray-500 line-clamp-2">{form.description}</p>
               )}
             </div>
-            <div className={`rounded-full px-3 py-1 text-xs font-medium ${form.is_active ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-700'}`}>
+            <div className={`ml-4 shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+              form.is_active 
+                ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20' 
+                : 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/20'
+            }`}>
               {form.is_active ? 'Activo' : 'Inactivo'}
             </div>
           </div>
           
-          <div className="flex items-center text-gray-500 text-sm space-x-4 mb-4">
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-              </svg>
-              <span>{form.fields.length} respuestas</span>
+          {/* Metadata */}
+          <div className="flex items-center gap-4 mb-6" style={cardStyles}>
+            <div className="flex items-center text-sm text-gray-500">
+              <ChartBarIcon className="w-4 h-4 mr-1.5" />
+              <span>{form.fields.length} campos</span>
             </div>
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-              </svg>
-              <span>Actualizado: {form.updated_at}</span>
+            <div className="flex items-center text-sm text-gray-500">
+              <ClockIcon className="w-4 h-4 mr-1.5" />
+              <span>Actualizado: {new Date(form.updated_at).toLocaleDateString()}</span>
             </div>
           </div>
           
-          <div className="flex space-x-2">
+          {/* Actions */}
+          <div className="flex gap-2">
             <Button 
-              variant="secondary" 
+              variant="primary"
               onClick={handleView}
-              className="flex-1"
+              style={buttonStyles}
             >
+              <EyeIcon className="w-4 h-4 mr-2" />
               Ver
             </Button>
             <Button 
-              variant="outline" 
+              variant="outline"
               onClick={handleEdit}
-              className="flex-1"
+              style={buttonStyles}
             >
+              <PencilIcon className="w-4 h-4 mr-2" />
               Editar
             </Button>
             <Button 
-              variant="danger" 
+              variant="outline"
               onClick={handleDelete}
-              className="flex-1"
+              className="!text-red-600 hover:!bg-red-50 hover:!border-red-600"
+              style={iconButtonStyles}
               disabled={isDeleting}
             >
               {isDeleting ? (
-                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <div className="animate-spin w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full" />
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
+                <TrashIcon className="w-5 h-5" />
               )}
             </Button>
           </div>
@@ -109,14 +136,15 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
         title="Eliminar Formulario"
         size="sm"
       >
-        <div className="space-y-4">
+        <div className="space-y-4" style={cardStyles}>
           <p className="text-gray-500">
             ¿Estás seguro de que deseas eliminar el formulario <span className="font-medium text-gray-900">"{form.title}"</span>? Esta acción no se puede deshacer.
           </p>
-          <div className="flex justify-end space-x-2">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={() => setShowDeleteModal(false)}
+              style={buttonStyles}
             >
               Cancelar
             </Button>
@@ -124,6 +152,7 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
               variant="danger"
               onClick={confirmDelete}
               disabled={isDeleting}
+              style={buttonStyles}
             >
               {isDeleting ? 'Eliminando...' : 'Eliminar'}
             </Button>
