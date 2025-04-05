@@ -96,8 +96,17 @@ const FormFieldProperties = ({ field, onChange, removeField }: FormFieldProperti
                     type="text"
                     value={newOption}
                     onChange={(e) => setNewOption(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Nueva opción..."
-                    className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mr-2"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newOption.trim()) {
+                        onChange({
+                          ...field,
+                          options: [...(field.options || []), newOption.trim()]
+                        });
+                        setNewOption('');
+                      }
+                    }}
                   />
                   <Button 
                     variant="outline" 

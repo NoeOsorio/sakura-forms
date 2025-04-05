@@ -57,9 +57,10 @@ const Modal: React.FC<ModalProps> = ({
           <div className="border-b border-gray-200/50 bg-white/80 backdrop-blur-sm px-6 py-4 flex justify-between items-center">
             <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
             <button
-              onClick={onClose}
+              type="button"
               className="rounded-full h-8 w-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none transition-colors"
-              aria-label="Close"
+              onClick={onClose}
+              aria-label="Cerrar"
             >
               <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

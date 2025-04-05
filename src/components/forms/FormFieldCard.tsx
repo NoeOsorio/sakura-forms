@@ -138,8 +138,8 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
             type="text"
             value={field.label}
             onChange={(e) => onChange({ label: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             placeholder="¿Cuál es tu pregunta?"
-            className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
           />
         </div>
 
@@ -148,12 +148,12 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
             <label className="text-sm font-medium text-gray-700 text-left">
               Descripción (opcional)
             </label>
-            <input
-              type="text"
+            <textarea
               value={field.description || ''}
               onChange={(e) => onChange({ description: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="Añade un texto de ayuda"
-              className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
+              rows={2}
             />
           </div>
         )}
@@ -167,8 +167,8 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
               type="text"
               value={field.placeholder || ''}
               onChange={(e) => onChange({ placeholder: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="Texto de ejemplo"
-              className="w-full p-2 border border-gray-200 rounded-lg bg-white/50"
             />
           </div>
         )}
@@ -466,8 +466,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                             e.stopPropagation();
                             onMoveUp();
                           }}
-                          className="p-2 text-gray-400 hover:text-gray-600 
-                            hover:bg-gray-100 rounded-xl transition-colors"
+                          className="p-2 text-gray-500 hover:text-gray-700"
                           aria-label="Mover campo hacia arriba"
                         >
                           <ChevronUpIcon className="h-5 w-5" />
@@ -486,8 +485,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                             e.stopPropagation();
                             onMoveDown();
                           }}
-                          className="p-2 text-gray-400 hover:text-gray-600 
-                            hover:bg-gray-100 rounded-xl transition-colors"
+                          className="p-2 text-gray-500 hover:text-gray-700"
                           aria-label="Mover campo hacia abajo"
                         >
                           <ChevronDownIcon className="h-5 w-5" />
@@ -507,8 +505,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                       e.stopPropagation();
                       onDuplicate();
                     }}
-                    className="p-2 text-gray-400 hover:text-gray-600 
-                      hover:bg-gray-100 rounded-xl transition-colors"
+                    className="p-2 text-gray-500 hover:text-gray-700"
                     aria-label="Duplicar campo"
                   >
                     <DocumentDuplicateIcon className="h-5 w-5" />
@@ -525,8 +522,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                       e.stopPropagation();
                       onRemove();
                     }}
-                    className="p-2 text-gray-400 hover:text-red-500
-                      hover:bg-red-50 rounded-xl transition-colors"
+                    className="p-2 text-red-500 hover:text-red-700"
                     aria-label="Eliminar campo"
                   >
                     <TrashIcon className="h-5 w-5" />
