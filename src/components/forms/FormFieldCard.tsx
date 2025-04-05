@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormField } from '../../types';
+import { FieldType, FormField } from '../../types/form';
 import { 
   TrashIcon, 
   DocumentDuplicateIcon, 
@@ -30,8 +30,6 @@ interface FormFieldCardProps {
   className?: string;
 }
 
-type FieldType = 'text' | 'textarea' | 'select' | 'radio' | 'email' | 'phone' | 'number' | 'date' | 'checkbox' | 'scale' | 'file' | 'signature';
-
 type IconComponent = React.ForwardRefExoticComponent<
   Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
     title?: string;
@@ -48,65 +46,75 @@ type FieldConfig = {
 };
 
 const fieldTypes: FieldConfig = {
-  text: { 
-    icon: DocumentTextIcon, 
-    label: 'Texto', 
-    gradient: 'from-blue-500 to-cyan-300'
+  text: {
+    icon: DocumentTextIcon,
+    label: 'Texto',
+    gradient: 'from-blue-500 to-blue-600'
   },
-  textarea: { 
-    icon: ChatBubbleBottomCenterTextIcon, 
-    label: 'Párrafo', 
-    gradient: 'from-violet-500 to-purple-300'
+  textarea: {
+    icon: ChatBubbleBottomCenterTextIcon,
+    label: 'Área de texto',
+    gradient: 'from-green-500 to-green-600'
   },
-  select: { 
-    icon: ListBulletIcon, 
-    label: 'Lista', 
-    gradient: 'from-fuchsia-500 to-pink-300'
+  email: {
+    icon: EnvelopeIcon,
+    label: 'Email',
+    gradient: 'from-purple-500 to-purple-600'
   },
-  radio: { 
-    icon: CheckCircleIcon, 
-    label: 'Opciones', 
-    gradient: 'from-rose-500 to-red-300'
+  phone: {
+    icon: PhoneIcon,
+    label: 'Teléfono',
+    gradient: 'from-indigo-500 to-indigo-600'
   },
-  email: { 
-    icon: EnvelopeIcon, 
-    label: 'Email', 
-    gradient: 'from-emerald-500 to-green-300'
+  number: {
+    icon: CalculatorIcon,
+    label: 'Número',
+    gradient: 'from-yellow-500 to-yellow-600'
   },
-  phone: { 
-    icon: PhoneIcon, 
-    label: 'Teléfono', 
-    gradient: 'from-orange-500 to-amber-300'
+  date: {
+    icon: CalendarDaysIcon,
+    label: 'Fecha',
+    gradient: 'from-red-500 to-red-600'
   },
-  number: { 
-    icon: CalculatorIcon, 
-    label: 'Número', 
-    gradient: 'from-red-500 to-orange-300'
+  time: {
+    icon: CalendarDaysIcon,
+    label: 'Hora',
+    gradient: 'from-orange-500 to-orange-600'
   },
-  date: { 
-    icon: CalendarDaysIcon, 
-    label: 'Fecha', 
-    gradient: 'from-teal-500 to-cyan-300'
+  datetime: {
+    icon: CalendarDaysIcon,
+    label: 'Fecha y hora',
+    gradient: 'from-pink-500 to-pink-600'
   },
-  checkbox: { 
-    icon: CheckCircleIcon, 
-    label: 'Checkbox', 
-    gradient: 'from-emerald-500 to-green-300'
+  select: {
+    icon: ListBulletIcon,
+    label: 'Selección',
+    gradient: 'from-teal-500 to-teal-600'
   },
-  scale: { 
-    icon: InformationCircleIcon, 
-    label: 'Escala', 
-    gradient: 'from-teal-500 to-cyan-300'
+  radio: {
+    icon: CheckCircleIcon,
+    label: 'Radio',
+    gradient: 'from-cyan-500 to-cyan-600'
   },
-  file: { 
-    icon: DocumentTextIcon, 
-    label: 'Archivo', 
-    gradient: 'from-blue-500 to-cyan-300'
+  checkbox: {
+    icon: CheckCircleIcon,
+    label: 'Checkbox',
+    gradient: 'from-emerald-500 to-emerald-600'
   },
-  signature: { 
-    icon: InformationCircleIcon, 
-    label: 'Firma', 
-    gradient: 'from-teal-500 to-cyan-300'
+  scale: {
+    icon: InformationCircleIcon,
+    label: 'Escala',
+    gradient: 'from-amber-500 to-amber-600'
+  },
+  file: {
+    icon: DocumentTextIcon,
+    label: 'Archivo',
+    gradient: 'from-gray-500 to-gray-600'
+  },
+  signature: {
+    icon: DocumentTextIcon,
+    label: 'Firma',
+    gradient: 'from-slate-500 to-slate-600'
   }
 };
 

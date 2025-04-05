@@ -1,6 +1,3 @@
-// Types
-export * from './types';
-
 // Components
 export { default as FormBuilder } from './MedicalFormBuilder';
 export { default as MedicalFormBuilder } from './MedicalFormBuilder';

@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FormField } from '../components/forms/types';
-import { FieldType } from '../types/field';
+import { 
+  FormField, 
+  FieldType, 
+  CreateFormInput, 
+  UpdateFormInput,
+  FieldWithOptions,
+  ScaleField,
+  FileField,
+  NumericField,
+  DateTimeField,
+  CheckboxField,
+  SignatureField,
+  TextField
+} from '../types/form';
 import { useAuth } from './useAuth';
 import { formService } from '../services/formService';
 import { toast } from 'react-hot-toast';
-import { CreateFormInput, UpdateFormInput } from '../types/form';
 
 export interface FormBuilderState {
   title: string;
@@ -30,7 +41,6 @@ export const useFormBuilder = () => {
     isAddModalOpen: false,
   });
 
-  // Cargar formulario existente si hay un ID
   useEffect(() => {
     if (id && user) {
       formService.getFormById(id)
@@ -41,9 +51,7 @@ export const useFormBuilder = () => {
             description: form.description || '',
             fields: form.fields.map(field => ({
               ...field,
-              placeholder: '',
-              errorMessage: '',
-              formatErrorMessage: '',
+              placeholder: field.placeholder || '',
             })),
           }));
         })
@@ -56,20 +64,76 @@ export const useFormBuilder = () => {
 
   const addField = (type: FieldType) => {
     const newId = `field-${Date.now()}`;
-    const newField: FormField = {
+    const baseField = {
       id: newId,
       type,
       label: '',
-      placeholder: '',
       required: false,
-      errorMessage: '',
-      formatErrorMessage: '',
-      options: type === 'select' || type === 'radio' ? ['Opción 1', 'Opción 2'] : [],
       description: '',
-      allowedTypes: type === 'file' ? ['image/*', 'application/pdf'] : undefined,
-      minValue: type === 'scale' ? 1 : undefined,
-      maxValue: type === 'scale' ? 10 : undefined,
+      placeholder: '',
     };
+
+    let newField: FormField;
+
+    switch (type) {
+      case 'select':
+      case 'radio':
+        newField = {
+          ...baseField,
+          type,
+          options: ['Opción 1', 'Opción 2'],
+        } as FieldWithOptions;
+        break;
+      case 'scale':
+        newField = {
+          ...baseField,
+          type,
+          minValue: 1,
+          maxValue: 10,
+        } as ScaleField;
+        break;
+      case 'file':
+        newField = {
+          ...baseField,
+          type,
+          allowedTypes: ['image/*', 'application/pdf'],
+        } as FileField;
+        break;
+      case 'number':
+        newField = {
+          ...baseField,
+          type,
+          minValue: 0,
+          maxValue: 100,
+        } as NumericField;
+        break;
+      case 'date':
+      case 'time':
+      case 'datetime':
+        newField = {
+          ...baseField,
+          type,
+        } as DateTimeField;
+        break;
+      case 'checkbox':
+        newField = {
+          ...baseField,
+          type,
+          checked: false,
+        } as CheckboxField;
+        break;
+      case 'signature':
+        newField = {
+          ...baseField,
+          type,
+        } as SignatureField;
+        break;
+      default:
+        newField = {
+          ...baseField,
+          type,
+        } as TextField;
+    }
     
     setState(prev => {
       const newFields = [...prev.fields, newField];
@@ -81,7 +145,6 @@ export const useFormBuilder = () => {
       };
     });
 
-    // Desplazarse al campo recién añadido
     setTimeout(() => {
       const fieldElements = document.querySelectorAll('.form-field-card');
       if (fieldElements.length > 0) {
@@ -114,7 +177,43 @@ export const useFormBuilder = () => {
   const updateField = (index: number, updatedField: Partial<FormField>) => {
     setState(prev => {
       const newFields = [...prev.fields];
-      newFields[index] = { ...newFields[index], ...updatedField };
+      const currentField = newFields[index];
+      
+      // Preservar el tipo específico del campo
+      const updated = { ...currentField, ...updatedField };
+      
+      // Asegurar que las propiedades específicas del tipo se mantengan
+      switch (currentField.type) {
+        case 'select':
+        case 'radio':
+          if (!('options' in updated)) {
+            (updated as FieldWithOptions).options = (currentField as FieldWithOptions).options;
+          }
+          break;
+        case 'scale':
+          if (!('minValue' in updated)) {
+            (updated as ScaleField).minValue = (currentField as ScaleField).minValue;
+          }
+          if (!('maxValue' in updated)) {
+            (updated as ScaleField).maxValue = (currentField as ScaleField).maxValue;
+          }
+          break;
+        case 'file':
+          if (!('allowedTypes' in updated)) {
+            (updated as FileField).allowedTypes = (currentField as FileField).allowedTypes;
+          }
+          break;
+        case 'number':
+          if (!('minValue' in updated)) {
+            (updated as NumericField).minValue = (currentField as NumericField).minValue;
+          }
+          if (!('maxValue' in updated)) {
+            (updated as NumericField).maxValue = (currentField as NumericField).maxValue;
+          }
+          break;
+      }
+      
+      newFields[index] = updated as FormField;
       return {
         ...prev,
         fields: newFields,
@@ -166,33 +265,16 @@ export const useFormBuilder = () => {
     }
 
     try {
-      console.log('Estado actual:', state);
-      
       const formData = {
         title: state.title,
         description: state.description,
-        fields: state.fields.map(field => {
-          console.log('Campo antes de mapear:', field);
-          const mappedField = {
-            type: field.type,
-            label: field.label,
-            description: field.description,
-            placeholder: field.placeholder,
-            required: field.required,
-            options: field.options,
-            allowedTypes: field.allowedTypes,
-            minValue: field.minValue,
-            maxValue: field.maxValue,
-            order: state.fields.indexOf(field),
-          };
-          console.log('Campo después de mapear:', mappedField);
-          return mappedField;
-        }),
+        fields: state.fields.map(field => ({
+          ...field,
+          order: state.fields.indexOf(field),
+        })),
         user_id: user.id,
         is_active: true,
       };
-
-      console.log('Payload completo:', formData);
 
       if (id) {
         await formService.updateForm(id, formData as UpdateFormInput);
