@@ -52,10 +52,10 @@ const FormFieldPicker = ({ onSelect }: FormFieldPickerProps) => {
       color: 'text-green-600 bg-green-50'
     },
     { 
-      type: 'phone', 
+      type: 'tel', 
       label: 'Teléfono', 
       icon: PhoneIcon, 
-      description: 'Número telefónico',
+      description: 'Campo para números de teléfono',
       color: 'text-orange-600 bg-orange-50'
     },
     { 
@@ -118,7 +118,7 @@ const FormFieldPicker = ({ onSelect }: FormFieldPickerProps) => {
 
   // Group field options by category
   const basicFields = fieldOptions.filter(f => 
-    ['text', 'textarea', 'email', 'phone', 'number'].includes(f.type));
+    ['text', 'textarea', 'email', 'tel', 'number'].includes(f.type));
   
   const choiceFields = fieldOptions.filter(f => 
     ['checkbox', 'radio', 'select'].includes(f.type));

@@ -3,7 +3,7 @@ export type FieldType =
   | 'text'
   | 'textarea'
   | 'email'
-  | 'phone'
+  | 'tel'
   | 'number'
   | 'select'
   | 'radio'
@@ -60,7 +60,7 @@ export interface DateTimeField extends BaseField {
 
 // Interfaz para campos de texto
 export interface TextField extends BaseField {
-  type: 'text' | 'textarea' | 'email' | 'phone';
+  type: 'text' | 'textarea' | 'email' | 'tel';
   maxLength?: number;
 }
 

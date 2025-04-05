@@ -10,7 +10,7 @@ import MainLayout from './components/layout/MainLayout'
 import { ProtectedRoute } from './features/auth/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import FormsPage from './pages/FormsPage'
-import { MedicalFormBuilder } from './components/forms'
+import MedicalFormBuilder from './components/forms/MedicalFormBuilder'
 import TemplatesPage from './pages/TemplatesPage'
 import SettingsPage from './pages/SettingsPage'
 import FormViewPage from './pages/FormViewPage'
@@ -38,7 +38,8 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/forms" element={<FormsPage />} />
               <Route path="/forms/new" element={<MedicalFormBuilder />} />
-              <Route path="/forms/:id" element={<MedicalFormBuilder />} />
+              <Route path="/forms/:id/edit" element={<MedicalFormBuilder />} />
+              <Route path="/forms/:id" element={<FormViewPage />} />
               <Route path="/forms/view/:id" element={<FormViewPage />} />
               <Route path="/responses" element={<ResponsesPage />} />
               <Route path="/templates" element={<TemplatesPage />} />

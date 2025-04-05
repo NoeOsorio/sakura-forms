@@ -54,52 +54,52 @@ const fieldTypes: FieldConfig = {
   textarea: {
     icon: ChatBubbleBottomCenterTextIcon,
     label: 'Área de texto',
-    gradient: 'from-green-500 to-green-600'
+    gradient: 'from-purple-500 to-purple-600'
   },
   email: {
     icon: EnvelopeIcon,
     label: 'Email',
-    gradient: 'from-purple-500 to-purple-600'
+    gradient: 'from-green-500 to-green-600'
   },
-  phone: {
+  tel: {
     icon: PhoneIcon,
     label: 'Teléfono',
-    gradient: 'from-indigo-500 to-indigo-600'
+    gradient: 'from-orange-500 to-orange-600'
   },
   number: {
     icon: CalculatorIcon,
     label: 'Número',
-    gradient: 'from-yellow-500 to-yellow-600'
+    gradient: 'from-red-500 to-red-600'
   },
   date: {
     icon: CalendarDaysIcon,
     label: 'Fecha',
-    gradient: 'from-red-500 to-red-600'
+    gradient: 'from-teal-500 to-teal-600'
   },
   time: {
     icon: CalendarDaysIcon,
     label: 'Hora',
-    gradient: 'from-orange-500 to-orange-600'
+    gradient: 'from-teal-500 to-teal-600'
   },
   datetime: {
     icon: CalendarDaysIcon,
     label: 'Fecha y hora',
-    gradient: 'from-pink-500 to-pink-600'
+    gradient: 'from-teal-500 to-teal-600'
   },
   select: {
     icon: ListBulletIcon,
     label: 'Selección',
-    gradient: 'from-teal-500 to-teal-600'
+    gradient: 'from-fuchsia-500 to-fuchsia-600'
   },
   radio: {
     icon: CheckCircleIcon,
     label: 'Radio',
-    gradient: 'from-cyan-500 to-cyan-600'
+    gradient: 'from-rose-500 to-rose-600'
   },
   checkbox: {
     icon: CheckCircleIcon,
     label: 'Checkbox',
-    gradient: 'from-emerald-500 to-emerald-600'
+    gradient: 'from-indigo-500 to-indigo-600'
   },
   scale: {
     icon: InformationCircleIcon,
@@ -109,12 +109,12 @@ const fieldTypes: FieldConfig = {
   file: {
     icon: DocumentTextIcon,
     label: 'Archivo',
-    gradient: 'from-gray-500 to-gray-600'
+    gradient: 'from-cyan-500 to-cyan-600'
   },
   signature: {
     icon: DocumentTextIcon,
     label: 'Firma',
-    gradient: 'from-slate-500 to-slate-600'
+    gradient: 'from-emerald-500 to-emerald-600'
   }
 };
 
@@ -409,7 +409,7 @@ const FormFieldCard: React.FC<FormFieldCardProps> = ({
                         </div>
                       )}
                       
-                      {(field.type as FieldType) === 'phone' && (
+                      {(field.type as FieldType) === 'tel' && (
                         <div className="text-gray-500">
                           <span className="font-medium">Formato:</span> +1234567890
                         </div>
