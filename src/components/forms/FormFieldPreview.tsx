@@ -67,6 +67,8 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
       return field.placeholder || defaultPlaceholders[field.type] || '';
     };
 
+    const defaultInputClasses = "w-full px-4 py-3 border border-gray-200 rounded-lg bg-white transition-all duration-200 ease-in-out focus:ring-1 focus:ring-teal-500 focus:border-teal-500 hover:border-gray-300";
+
     switch (field.type) {
       case 'textarea':
         return (
@@ -74,7 +76,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
             value={value}
             onChange={handleChange}
             placeholder={getPlaceholder()}
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className={`${defaultInputClasses} min-h-[120px]`}
             rows={5}
           />
         );
@@ -84,7 +86,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
           <select
             value={value}
             onChange={handleChange}
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white"
+            className={`${defaultInputClasses} appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"%3E%3Cpath stroke="%236B7280" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/%3E%3C/svg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:1.5em_1.5em]`}
           >
             <option value="">Selecciona una opción...</option>
             {(field as FieldWithOptions).options?.map((option, index) => (
@@ -97,9 +99,9 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
 
       case 'radio':
         return (
-          <div className="space-y-3 p-2">
+          <div className="space-y-2">
             {(field as FieldWithOptions).options?.map((option, index) => (
-              <div key={index} className="flex items-center p-3 hover:bg-white/80 rounded-lg transition-colors">
+              <div key={index} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
                 <input
                   type="radio"
                   id={`option-${field.id}-${index}`}
@@ -107,9 +109,9 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
                   value={option}
                   checked={value === option}
                   onChange={() => onChange(option)}
-                  className="mr-3 h-5 w-5 text-teal-600 focus:ring-teal-500 border-gray-300"
+                  className="w-4 h-4 text-teal-600 focus:ring-teal-500 border-gray-300"
                 />
-                <label htmlFor={`option-${field.id}-${index}`} className="text-gray-700 select-none cursor-pointer">
+                <label htmlFor={`option-${field.id}-${index}`} className="ml-3 text-gray-700 text-sm select-none cursor-pointer">
                   {option}
                 </label>
               </div>
@@ -119,15 +121,15 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
 
       case 'checkbox':
         return (
-          <div className="flex items-center bg-white/50 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+          <div className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
             <input
               type="checkbox"
               id={`field-${field.id}`}
               checked={value === 'true'}
               onChange={handleChange}
-              className="h-6 w-6 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+              className="w-4 h-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
             />
-            <label htmlFor={`field-${field.id}`} className="ml-4 text-gray-700 select-none cursor-pointer">
+            <label htmlFor={`field-${field.id}`} className="ml-3 text-sm text-gray-700 select-none cursor-pointer">
               {field.description || field.label}
             </label>
           </div>
@@ -135,8 +137,8 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
 
       case 'scale':
         return (
-          <div className="space-y-6 py-4">
-            <div className="flex justify-between items-center text-sm text-gray-600">
+          <div className="space-y-4">
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
               {Array.from({ length: max - min + 1 }, (_, i) => min + i).map((num) => (
                 <label
                   key={num}
@@ -151,17 +153,17 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
                     onChange={(e) => onChange(e.target.value)}
                     className="sr-only"
                   />
-                  <span className={`w-12 h-12 rounded-full flex items-center justify-center mb-2
+                  <span className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm
                     ${currentValue === num 
-                      ? 'bg-teal-100 text-teal-600 ring-2 ring-teal-600' 
-                      : 'bg-gray-100 hover:bg-gray-200'}`}
+                      ? 'bg-teal-50 text-teal-600 ring-2 ring-teal-500' 
+                      : 'bg-gray-50 hover:bg-gray-100'}`}
                   >
                     {num}
                   </span>
                 </label>
               ))}
             </div>
-            <div className="flex justify-between text-sm text-gray-500 px-6">
+            <div className="flex justify-between text-xs text-gray-500">
               <span>Mínimo</span>
               <span>Máximo</span>
             </div>
@@ -240,22 +242,21 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
             value={value}
             onChange={handleChange}
             placeholder={getPlaceholder()}
-            className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className={defaultInputClasses}
           />
         );
     }
   };
 
   return (
-    <div className="space-y-4 text-center">
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex items-center gap-2">
-          <label className="block font-medium text-gray-700">
+    <div className="space-y-4">
+      <div className="flex flex-col items-start">
+        <div className="flex items-center gap-2 mb-1">
+          <label className="block font-medium text-gray-800">
             {field.label}
           </label>
           {field.required && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">
-              <ExclamationCircleIcon className="w-4 h-4 mr-1" />
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
               Requerido
             </span>
           )}
@@ -265,11 +266,13 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
         )}
       </div>
 
-      {renderField()}
+      <div>
+        {renderField()}
+      </div>
 
       {error && (
-        <div className="text-sm text-red-600 mt-2 flex items-center justify-center gap-1">
-          <ExclamationCircleIcon className="w-4 h-4" />
+        <div className="text-sm text-red-600 mt-2 flex items-start gap-2">
+          <ExclamationCircleIcon className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}

@@ -9,7 +9,8 @@ import {
   ClockIcon, 
   EyeIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 
 interface FormCardProps {
@@ -21,6 +22,7 @@ interface FormCardProps {
 const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleView = () => {
     navigate(`/forms/view/${form.id}`);
@@ -34,9 +36,18 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
     setShowDeleteModal(true);
   };
 
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
   const confirmDelete = () => {
     onDelete(form.id);
     setShowDeleteModal(false);
+  };
+
+  const copyToClipboard = () => {
+    const publicUrl = `${window.location.origin}/forms/public/${form.id}`;
+    navigator.clipboard.writeText(publicUrl);
   };
 
   const cardStyles = {
@@ -115,6 +126,14 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
             </Button>
             <Button 
               variant="outline"
+              onClick={handleShare}
+              style={buttonStyles}
+            >
+              <ShareIcon className="w-4 h-4 mr-2" />
+              Compartir
+            </Button>
+            <Button 
+              variant="outline"
               onClick={handleDelete}
               className="!text-red-600 hover:!bg-red-50 hover:!border-red-600"
               style={iconButtonStyles}
@@ -130,6 +149,7 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
         </div>
       </Card>
 
+      {/* Delete Modal */}
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -156,6 +176,38 @@ const FormCard: React.FC<FormCardProps> = ({ form, onDelete, isDeleting }) => {
             >
               {isDeleting ? 'Eliminando...' : 'Eliminar'}
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Share Modal */}
+      <Modal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title="Compartir Formulario"
+        size="sm"
+      >
+        <div className="space-y-4" style={cardStyles}>
+          <p className="text-gray-500">
+            Comparte este enlace con los pacientes para que puedan completar el formulario:
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={`${window.location.origin}/forms/public/${form.id}`}
+              readOnly
+              className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
+            />
+            <Button
+              variant="primary"
+              onClick={copyToClipboard}
+              style={buttonStyles}
+            >
+              Copiar
+            </Button>
+          </div>
+          <div className="text-sm text-gray-500 mt-2">
+            <p>Este enlace es público y no requiere inicio de sesión.</p>
           </div>
         </div>
       </Modal>

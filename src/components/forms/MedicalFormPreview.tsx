@@ -20,8 +20,9 @@ interface MedicalFormPreviewProps {
   title: string;
   description: string;
   fields: FormField[];
-  onComplete: () => void;
-  onBack: () => void;
+  onComplete: (values: Record<string, string>) => void;
+  onBack?: () => void;
+  isPublic?: boolean;
 }
 
 const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
@@ -29,7 +30,8 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
   description,
   fields,
   onComplete,
-  onBack
+  onBack,
+  isPublic = false
 }) => {
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -41,12 +43,14 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
       <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto text-center">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <p className="text-gray-600 mb-6">{description}</p>
-        <div className="py-6 border-t border-gray-200">
-          <p className="text-gray-500 mb-4">Este formulario no tiene campos definidos.</p>
-          <Button variant="outline" onClick={onBack}>
-            Volver al editor
-          </Button>
-        </div>
+        {!isPublic && onBack && (
+          <div className="py-6 border-t border-gray-200">
+            <p className="text-gray-500 mb-4">Este formulario no tiene campos definidos.</p>
+            <Button variant="outline" onClick={onBack}>
+              Volver al editor
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -100,6 +104,7 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
     
     // Formulario completado exitosamente
     setIsSubmitted(true);
+    onComplete(values);
   };
   
   // Si el formulario ha sido enviado, mostrar mensaje de agradecimiento
@@ -113,16 +118,10 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
         </div>
         <h2 className="text-2xl font-semibold mb-3">¡Gracias por completar el formulario!</h2>
         <p className="text-gray-600 mb-6">Tu información ha sido recibida correctamente y será procesada por nuestro equipo médico.</p>
-        <div className="py-4">
-          <Button variant="primary" onClick={onComplete} className="px-8 py-3 text-lg">
-            Finalizar
-          </Button>
-        </div>
       </div>
     );
   }
 
-  
   // Obtener icono para el tipo de campo
   const getFieldIcon = (type: FieldType) => {
     switch (type) {
@@ -153,18 +152,18 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
+    <div className="bg-white rounded-lg shadow-lg">
       {/* Encabezado */}
-      <div className="bg-blue-600 text-white p-8 rounded-t-lg">
-        <h2 className="text-2xl font-semibold mb-3">{title}</h2>
-        <p className="text-blue-100">{description}</p>
+      <div className="bg-blue-600 text-white p-4 sm:p-6 rounded-t-lg">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-1 sm:mb-2">{title}</h2>
+        <p className="text-sm sm:text-base text-blue-100">{description}</p>
       </div>
       
-      <div className="p-8">
+      <div className="p-4 sm:p-6">
         {/* Instrucciones */}
-        <div className="mb-8 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-          <h3 className="font-medium text-blue-800">Instrucciones</h3>
-          <p className="text-blue-700 text-sm mt-1">
+        <div className="mb-4 sm:mb-6 bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+          <h3 className="font-medium text-blue-800 text-sm sm:text-base">Instrucciones</h3>
+          <p className="text-blue-700 text-xs sm:text-sm mt-1">
             Por favor, complete todos los campos marcados con un asterisco (*). 
             Esta información es importante para su atención médica.
           </p>
@@ -172,21 +171,21 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
         
         {/* Formulario con todos los campos */}
         <form onSubmit={handleSubmit}>
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-6">
             {fields.map((field, index) => (
               <div 
                 key={field.id} 
                 id={`field-section-${field.id}`} 
-                className="p-6 rounded-lg bg-gray-50 border border-gray-200 hover:border-blue-300 transition-colors"
+                className="p-3 sm:p-4 rounded-lg bg-gray-50 border border-gray-200 hover:border-blue-300 transition-colors"
               >
                 {/* Número y tipo de campo */}
-                <div className="flex items-center mb-3">
-                  <div className="bg-blue-100 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold mr-2">
+                <div className="flex items-center mb-2 sm:mb-3">
+                  <div className="bg-blue-100 text-blue-700 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-sm sm:text-base font-semibold mr-2">
                     {index + 1}
                   </div>
-                  <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium flex items-center">
+                  <div className="bg-blue-50 text-blue-700 px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center">
                     {getFieldIcon(field.type)}
-                    <span className="ml-1 capitalize">{fieldTypeLabels[field.type]}</span>
+                    <span className="ml-1 capitalize text-xs">{fieldTypeLabels[field.type]}</span>
                   </div>
                 </div>
                 
@@ -202,23 +201,27 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
           </div>
           
           {/* Pie de formulario */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="bg-gray-50 p-4 rounded-lg mb-6 text-sm text-gray-600">
+          <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
+            <div className="bg-gray-50 p-3 rounded-lg mb-4 text-xs sm:text-sm text-gray-600">
               <p>Al enviar este formulario, confirma que toda la información proporcionada es correcta y autoriza a nuestro equipo médico a utilizarla para su atención.</p>
             </div>
             
-            <div className="flex justify-between items-center">
-              <Button
-                variant="outline"
-                onClick={onBack}
-                type="button"
-              >
-                Volver al editor
-              </Button>
+            <div className="flex justify-end">
+              {!isPublic && onBack && (
+                <Button
+                  variant="outline"
+                  onClick={onBack}
+                  type="button"
+                  className="mr-2 text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2"
+                >
+                  Volver al editor
+                </Button>
+              )}
               
               <Button
                 variant="primary"
                 type="submit"
+                className="text-sm sm:text-base px-4 py-1.5 sm:px-6 sm:py-2"
               >
                 Enviar formulario
               </Button>

@@ -14,6 +14,7 @@ import MedicalFormBuilder from './components/forms/MedicalFormBuilder'
 import TemplatesPage from './pages/TemplatesPage'
 import SettingsPage from './pages/SettingsPage'
 import FormViewPage from './pages/FormViewPage'
+import PublicFormView from './pages/PublicFormView'
 import './App.css'
 import ResponsesPage from './pages/ResponsesPage'
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/forms/public/:id" element={<PublicFormView />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout><Outlet /></MainLayout>}>
               <Route path="/" element={<HomePage />} />
