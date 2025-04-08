@@ -5,6 +5,8 @@ import Button from '../shared/Button';
 interface FormsListProps {
   forms: Form[];
   onDelete: (id: string) => void;
+  onShare: (id: string) => void;
+  onDuplicate: (id: string) => void;
   onClearFilters: () => void;
   isDeleting?: boolean;
 }
@@ -12,14 +14,16 @@ interface FormsListProps {
 const FormsList = ({
   forms,
   onDelete,
+  onShare,
+  onDuplicate,
   onClearFilters,
   isDeleting,
 }: FormsListProps) => {
   if (forms.length === 0) {
     return (
-      <div className="col-span-3 text-center py-12">
-        <p className="text-gray-500 text-lg">No se encontraron formularios con los filtros actuales.</p>
-        <Button variant="outline" className="mt-4" onClick={onClearFilters}>
+      <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+        <p className="text-gray-500 mb-4">No se encontraron formularios</p>
+        <Button variant="outline" onClick={onClearFilters}>
           Limpiar filtros
         </Button>
       </div>
@@ -27,12 +31,14 @@ const FormsList = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {forms.map((form) => (
         <FormCard
           key={form.id}
           form={form}
-          onDelete={onDelete}
+          onShare={() => onShare(form.id)}
+          onDelete={() => onDelete(form.id)}
+          onDuplicate={() => onDuplicate(form.id)}
           isDeleting={isDeleting}
         />
       ))}

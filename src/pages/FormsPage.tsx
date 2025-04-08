@@ -13,6 +13,7 @@ const FormsPage = () => {
     setFilterActive,
     clearFilters,
     deleteForm,
+    shareForm,
     isDeleting,
   } = useForms();
 
@@ -35,6 +36,7 @@ const FormsPage = () => {
       <FormsList
         forms={forms}
         onDelete={deleteForm}
+        onShare={shareForm}
         onClearFilters={clearFilters}
         isDeleting={isDeleting}
       />

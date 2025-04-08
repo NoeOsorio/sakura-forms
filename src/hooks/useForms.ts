@@ -90,6 +90,18 @@ export function useForms() {
     setFilterActive(null);
   };
 
+  // Compartir formulario
+  const shareForm = async (formId: string) => {
+    try {
+      const publicUrl = `${window.location.origin}/forms/public/${formId}`;
+      await navigator.clipboard.writeText(publicUrl);
+      toast.success('Enlace copiado al portapapeles');
+    } catch (error) {
+      console.error('Error al copiar el enlace:', error);
+      toast.error('Error al copiar el enlace');
+    }
+  };
+
   return {
     forms: filteredForms,
     templates,
@@ -104,6 +116,7 @@ export function useForms() {
     createForm: createFormMutation.mutate,
     updateForm: updateFormMutation.mutate,
     deleteForm: deleteFormMutation.mutate,
+    shareForm,
     loadForm,
     isCreating: createFormMutation.isPending,
     isUpdating: updateFormMutation.isPending,
