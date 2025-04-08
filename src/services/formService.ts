@@ -1,11 +1,83 @@
 import { supabase } from '../lib/supabase';
-import { Form, CreateFormInput, UpdateFormInput, FormResponse, FormField } from '../types/form';
-import { FormField as UIFormField, FieldType } from '../types';
+import { 
+  Form, 
+  CreateFormInput, 
+  UpdateFormInput, 
+  FormResponse, 
+  FormField, 
+  FieldType,
+  NumericField,
+  FieldWithOptions,
+  ScaleField,
+  FileField
+} from '../types/form';
+
+export const transformFormFieldsToUI = (fields: FormField[]): FormField[] => {
+  const validTypes: FieldType[] = [
+    'text', 'email', 'number', 'tel', 'textarea', 'date', 
+    'select', 'radio', 'checkbox', 'scale', 'file', 'signature'
+  ];
+
+  return fields.map(field => {
+    const type = validTypes.includes(field.type) ? field.type : 'text';
+
+    // Preservar las propiedades específicas del tipo
+    switch (type) {
+      case 'text':
+      case 'textarea':
+      case 'email':
+      case 'tel':
+        return {
+          ...field,
+          type,
+          placeholder: field.placeholder || '',
+        };
+      case 'number':
+        return {
+          ...field,
+          type,
+          placeholder: field.placeholder || '',
+          minValue: (field as NumericField).minValue || 0,
+          maxValue: (field as NumericField).maxValue || 100,
+        };
+      case 'select':
+      case 'radio':
+        return {
+          ...field,
+          type,
+          options: (field as FieldWithOptions).options || [],
+        };
+      case 'scale':
+        return {
+          ...field,
+          type,
+          minValue: (field as ScaleField).minValue || 1,
+          maxValue: (field as ScaleField).maxValue || 10,
+        };
+      case 'file':
+        return {
+          ...field,
+          type,
+          allowedTypes: (field as FileField).allowedTypes || ['image/*', 'application/pdf'],
+        };
+      case 'signature':
+        return {
+          ...field,
+          type,
+        };
+      default:
+        return {
+          ...field,
+          type: 'text',
+          placeholder: field.placeholder || '',
+        };
+    }
+  });
+};
 
 export const formService = {
   // Crear un nuevo formulario
-  async createForm(input: CreateFormInput): Promise<Form> {
-    // Primero creamos el formulario base
+  async createForm(input: CreateFormInput & { user_id: string }): Promise<Form> {
     const { data: formData, error: formError } = await supabase
       .from('forms')
       .insert([{
@@ -29,9 +101,6 @@ export const formService = {
       placeholder: field.placeholder,
       required: field.required,
       options: field.options,
-      allowed_types: field.allowedTypes,
-      min_value: field.minValue,
-      max_value: field.maxValue,
       order_index: index
     }));
 
@@ -130,7 +199,7 @@ export const formService = {
   // Actualizar un formulario
   async updateForm(id: string, input: UpdateFormInput): Promise<Form> {
     // Actualizar el formulario base
-    const { data: formData, error: formError } = await supabase
+    const { error: formError } = await supabase
       .from('forms')
       .update({
         title: input.title,
@@ -139,9 +208,7 @@ export const formService = {
         category: input.category,
         is_active: input.is_active
       })
-      .eq('id', id)
-      .select()
-      .single();
+      .eq('id', id);
 
     if (formError) throw formError;
 
@@ -164,9 +231,6 @@ export const formService = {
         placeholder: field.placeholder,
         required: field.required,
         options: field.options,
-        allowed_types: field.allowedTypes,
-        min_value: field.minValue,
-        max_value: field.maxValue,
         order_index: index
       }));
 
@@ -236,7 +300,7 @@ export const formService = {
   },
 
   // Guardar una respuesta de formulario
-  async saveResponse(formId: string, responses: Record<string, any>): Promise<FormResponse> {
+  async saveResponse(formId: string, responses: Record<string, string | number | boolean | null>): Promise<FormResponse> {
     const { data, error } = await supabase
       .from('form_responses')
       .insert([{
@@ -261,28 +325,4 @@ export const formService = {
     if (error) throw error;
     return data;
   }
-};
-
-export const transformFormFieldsToUI = (fields: FormField[]): UIFormField[] => {
-  const validTypes: FieldType[] = [
-    'text', 'email', 'number', 'phone', 'textarea', 'date', 
-    'select', 'radio', 'checkbox', 'scale', 'file', 'signature'
-  ];
-
-  return fields.map((field, index) => {
-    const type = validTypes.includes(field.type as FieldType) ? field.type as FieldType : 'text';
-
-    return {
-      id: Number(field.id) || index + 1,
-      type,
-      label: field.label,
-      description: field.description,
-      required: field.required,
-      placeholder: field.placeholder || '',
-      options: field.options,
-      minValue: field.minValue,
-      maxValue: field.maxValue,
-      allowedTypes: field.allowedTypes,
-    };
-  });
 }; 

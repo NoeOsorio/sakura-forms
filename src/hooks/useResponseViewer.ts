@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FormField } from '../types';
+import { FormField } from '../types/form';
 
 interface ResponseValue {
-  fieldId: number;
+  fieldId: string;
   value: string | string[] | number | boolean | null;
 }
 
@@ -49,15 +49,15 @@ export const useResponseViewer = () => {
           submittedAt: new Date().toISOString(),
           status: 'completed',
           values: [
-            { fieldId: 1, value: 'Juan Pérez' },
-            { fieldId: 2, value: 'juan@ejemplo.com' },
-            { fieldId: 3, value: 'Tengo dolor de cabeza y fiebre desde hace 2 días.' },
+            { fieldId: '1', value: 'Juan Pérez' },
+            { fieldId: '2', value: 'juan@ejemplo.com' },
+            { fieldId: '3', value: 'Tengo dolor de cabeza y fiebre desde hace 2 días.' },
           ],
         };
         
         const mockFormFields: FormField[] = [
           {
-            id: 1,
+            id: '1',
             type: 'text',
             label: 'Nombre completo',
             placeholder: 'Ingrese su nombre completo',
@@ -65,7 +65,7 @@ export const useResponseViewer = () => {
             options: [],
           },
           {
-            id: 2,
+            id: '2',
             type: 'email',
             label: 'Correo electrónico',
             placeholder: 'ejemplo@correo.com',
@@ -73,7 +73,7 @@ export const useResponseViewer = () => {
             options: [],
           },
           {
-            id: 3,
+            id: '3',
             type: 'textarea',
             label: 'Descripción',
             placeholder: 'Describa su situación',
@@ -107,7 +107,7 @@ export const useResponseViewer = () => {
   }, [responseId]);
   
   // Obtener el valor de respuesta para un campo específico
-  const getResponseValue = (fieldId: number): string | string[] | number | boolean | null => {
+  const getResponseValue = (fieldId: string): string | string[] | number | boolean | null => {
     if (!state.response) return null;
     
     const responseValue = state.response.values.find(v => v.fieldId === fieldId);
@@ -115,7 +115,7 @@ export const useResponseViewer = () => {
   };
   
   // Obtener el campo del formulario para un ID específico
-  const getFormField = (fieldId: number): FormField | undefined => {
+  const getFormField = (fieldId: string): FormField | undefined => {
     return state.formFields.find(f => f.id === fieldId);
   };
   

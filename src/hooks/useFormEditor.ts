@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FormField, FieldType } from '../types';
+import { 
+  FormField, 
+  FieldType, 
+  TextField, 
+  NumericField, 
+  DateTimeField, 
+  FieldWithOptions, 
+  CheckboxField, 
+  ScaleField, 
+  FileField, 
+  SignatureField 
+} from '../types/form';
 
 interface FormEditorState {
   id: string | null;
@@ -44,29 +55,29 @@ export const useFormEditor = () => {
           description: 'Este es un formulario de ejemplo para editar',
           fields: [
             {
-              id: 1,
-              type: 'text' as FieldType,
+              id: '1',
+              type: 'text' as const,
               label: 'Nombre completo',
               placeholder: 'Ingrese su nombre completo',
               required: true,
               options: [],
-            },
+            } as TextField,
             {
-              id: 2,
-              type: 'email' as FieldType,
+              id: '2',
+              type: 'email' as const,
               label: 'Correo electrónico',
               placeholder: 'ejemplo@correo.com',
               required: true,
               options: [],
-            },
+            } as TextField,
             {
-              id: 3,
-              type: 'textarea' as FieldType,
+              id: '3',
+              type: 'textarea' as const,
               label: 'Descripción',
               placeholder: 'Describa su situación',
               required: false,
               options: [],
-            },
+            } as TextField,
           ],
         };
         
@@ -75,7 +86,7 @@ export const useFormEditor = () => {
         
         setState(prev => ({
           ...prev,
-          id: mockForm.id || null, // Handle undefined case by converting to null
+          id: mockForm.id || null,
           title: mockForm.title,
           description: mockForm.description,
           fields: mockForm.fields,
@@ -98,14 +109,84 @@ export const useFormEditor = () => {
   
   // Añadir nuevo campo
   const addField = (type: FieldType) => {
-    const newField: FormField = {
-      id: Date.now(),
-      type,
+    const baseField = {
+      id: Date.now().toString(),
       label: '',
-      placeholder: '',
       required: false,
-      options: type === 'select' || type === 'radio' ? ['Opción 1', 'Opción 2'] : [],
+      description: '',
+      placeholder: '',
     };
+
+    let newField: FormField;
+
+    switch (type) {
+      case 'text':
+      case 'textarea':
+      case 'email':
+      case 'tel':
+        newField = {
+          ...baseField,
+          type,
+        } as TextField;
+        break;
+      case 'number':
+        newField = {
+          ...baseField,
+          type,
+          minValue: 0,
+          maxValue: 100,
+        } as NumericField;
+        break;
+      case 'date':
+      case 'time':
+      case 'datetime':
+        newField = {
+          ...baseField,
+          type,
+        } as DateTimeField;
+        break;
+      case 'select':
+      case 'radio':
+        newField = {
+          ...baseField,
+          type,
+          options: ['Opción 1', 'Opción 2'],
+        } as FieldWithOptions;
+        break;
+      case 'checkbox':
+        newField = {
+          ...baseField,
+          type,
+          checked: false,
+        } as CheckboxField;
+        break;
+      case 'scale':
+        newField = {
+          ...baseField,
+          type,
+          minValue: 1,
+          maxValue: 10,
+        } as ScaleField;
+        break;
+      case 'file':
+        newField = {
+          ...baseField,
+          type,
+          allowedTypes: ['image/*', 'application/pdf'],
+        } as FileField;
+        break;
+      case 'signature':
+        newField = {
+          ...baseField,
+          type,
+        } as SignatureField;
+        break;
+      default:
+        newField = {
+          ...baseField,
+          type: 'text',
+        } as TextField;
+    }
     
     const newFields = [...state.fields, newField];
     setState(prev => ({
@@ -144,8 +225,43 @@ export const useFormEditor = () => {
   // Actualizar un campo
   const updateField = (index: number, updatedField: Partial<FormField>) => {
     const newFields = [...state.fields];
-    newFields[index] = { ...newFields[index], ...updatedField };
+    const currentField = newFields[index];
     
+    // Preservar el tipo específico del campo
+    const updated = { ...currentField, ...updatedField };
+    
+    // Asegurar que las propiedades específicas del tipo se mantengan
+    switch (currentField.type) {
+      case 'select':
+      case 'radio':
+        if (!('options' in updated)) {
+          (updated as FieldWithOptions).options = (currentField as FieldWithOptions).options;
+        }
+        break;
+      case 'scale':
+        if (!('minValue' in updated)) {
+          (updated as ScaleField).minValue = (currentField as ScaleField).minValue;
+        }
+        if (!('maxValue' in updated)) {
+          (updated as ScaleField).maxValue = (currentField as ScaleField).maxValue;
+        }
+        break;
+      case 'file':
+        if (!('allowedTypes' in updated)) {
+          (updated as FileField).allowedTypes = (currentField as FileField).allowedTypes;
+        }
+        break;
+      case 'number':
+        if (!('minValue' in updated)) {
+          (updated as NumericField).minValue = (currentField as NumericField).minValue;
+        }
+        if (!('maxValue' in updated)) {
+          (updated as NumericField).maxValue = (currentField as NumericField).maxValue;
+        }
+        break;
+    }
+    
+    newFields[index] = updated as FormField;
     setState(prev => ({
       ...prev,
       fields: newFields,
@@ -172,7 +288,7 @@ export const useFormEditor = () => {
     const fieldToDuplicate = state.fields[index];
     const duplicatedField = {
       ...fieldToDuplicate,
-      id: Date.now(),
+      id: Date.now().toString(),
       label: `${fieldToDuplicate.label} (copia)`,
     };
     

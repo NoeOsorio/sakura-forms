@@ -1,4 +1,4 @@
-import { FormField } from '../types';
+import { FormField } from '../types/form';
 
 /**
  * Valida un campo de formulario
@@ -26,7 +26,7 @@ export const validateField = (field: FormField, value: string): string | null =>
       }
       break;
       
-    case 'phone':
+    case 'tel':
       // Validación básica de teléfono (solo números y algunos caracteres especiales)
       if (!/^[0-9+\-\s()]*$/.test(value)) {
         return 'Por favor, ingrese un número de teléfono válido';
@@ -62,7 +62,7 @@ export const getDefaultErrorMessage = (type: string): string => {
   switch (type) {
     case 'email':
       return 'Por favor, ingrese un email válido';
-    case 'phone':
+    case 'tel':
       return 'Por favor, ingrese un número de teléfono válido';
     case 'number':
       return 'Por favor, ingrese un número válido';

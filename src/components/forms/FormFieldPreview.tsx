@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { FormField } from '../../types';
+import { FormField, FieldType, FieldWithOptions, ScaleField, FileField } from '../../types/form';
 import SignaturePad from 'react-signature-canvas';
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 interface FormFieldPreviewProps {
   field: FormField;
@@ -41,9 +42,30 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
   };
 
   const renderField = () => {
-    const min = field.type === 'scale' ? (field.minValue || 1) : 1;
-    const max = field.type === 'scale' ? (field.maxValue || 10) : 10;
+    const min = field.type === 'scale' ? (field as ScaleField).minValue || 1 : 1;
+    const max = field.type === 'scale' ? (field as ScaleField).maxValue || 10 : 10;
     const currentValue = field.type === 'scale' ? (parseInt(value) || min) : 1;
+
+    const defaultPlaceholders: Record<FieldType, string> = {
+      text: 'Escribe tu respuesta...',
+      textarea: 'Escribe tu respuesta detallada aquí...',
+      email: 'ejemplo@correo.com',
+      tel: '(123) 456-7890',
+      number: '0',
+      date: '',
+      time: '',
+      datetime: '',
+      select: '',
+      radio: '',
+      checkbox: '',
+      scale: '',
+      file: '',
+      signature: ''
+    };
+
+    const getPlaceholder = () => {
+      return field.placeholder || defaultPlaceholders[field.type] || '';
+    };
 
     switch (field.type) {
       case 'textarea':
@@ -51,7 +73,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
           <textarea
             value={value}
             onChange={handleChange}
-            placeholder={field.placeholder}
+            placeholder={getPlaceholder()}
             className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             rows={5}
           />
@@ -65,7 +87,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
             className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white"
           >
             <option value="">Selecciona una opción...</option>
-            {field.options?.map((option, index) => (
+            {(field as FieldWithOptions).options?.map((option, index) => (
               <option key={index} value={option}>
                 {option}
               </option>
@@ -76,7 +98,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
       case 'radio':
         return (
           <div className="space-y-3 p-2">
-            {field.options?.map((option, index) => (
+            {(field as FieldWithOptions).options?.map((option, index) => (
               <div key={index} className="flex items-center p-3 hover:bg-white/80 rounded-lg transition-colors">
                 <input
                   type="radio"
@@ -153,7 +175,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
               <input
                 type="file"
                 onChange={handleChange}
-                accept={field.allowedTypes?.join(',')}
+                accept={(field as FileField).allowedTypes?.join(',')}
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-4
                   file:rounded-lg file:border-0 file:text-sm file:font-medium
                   file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100
@@ -161,9 +183,9 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
                   focus:ring-teal-500 focus:border-teal-500 p-2"
               />
             </div>
-            {field.allowedTypes && field.allowedTypes.length > 0 && (
+            {(field as FileField).allowedTypes && (field as FileField).allowedTypes.length > 0 && (
               <p className="text-sm text-gray-500 px-2">
-                Tipos permitidos: {field.allowedTypes.map(type => 
+                Tipos permitidos: {(field as FileField).allowedTypes.map(type => 
                   type === 'image/*' ? 'Imágenes'
                   : type === 'application/pdf' ? 'PDF'
                   : type === '.doc,.docx' ? 'Word'
@@ -217,7 +239,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
             type={field.type}
             value={value}
             onChange={handleChange}
-            placeholder={field.placeholder}
+            placeholder={getPlaceholder()}
             className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
           />
         );
@@ -225,22 +247,31 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
   };
 
   return (
-    <div className="space-y-4">
-      <label className="block font-medium text-gray-700 mb-1">
-        {field.label}
-        {field.required && <span className="ml-1 text-red-500">*</span>}
-      </label>
-      
-      {field.description && field.type !== 'checkbox' && (
-        <p className="text-sm text-gray-500 mb-3">{field.description}</p>
-      )}
-      
+    <div className="space-y-4 text-center">
+      <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center gap-2">
+          <label className="block font-medium text-gray-700">
+            {field.label}
+          </label>
+          {field.required && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">
+              <ExclamationCircleIcon className="w-4 h-4 mr-1" />
+              Requerido
+            </span>
+          )}
+        </div>
+        {field.description && (
+          <p className="text-sm text-gray-500">{field.description}</p>
+        )}
+      </div>
+
       {renderField()}
-      
+
       {error && (
-        <p className="text-sm text-red-500 mt-2">
-          {error}
-        </p>
+        <div className="text-sm text-red-600 mt-2 flex items-center justify-center gap-1">
+          <ExclamationCircleIcon className="w-4 h-4" />
+          <span>{error}</span>
+        </div>
       )}
     </div>
   );

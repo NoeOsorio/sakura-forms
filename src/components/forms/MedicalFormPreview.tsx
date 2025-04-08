@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormField } from '../../types';
+import { FormField, FieldType, fieldTypeLabels } from '../../types/form';
 import FormFieldPreview from './FormFieldPreview';
 import Button from '../shared/Button';
 import { validateField } from '../../validation/ValidationHelper';
@@ -31,8 +31,8 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
   onComplete,
   onBack
 }) => {
-  const [values, setValues] = useState<Record<number, string>>({});
-  const [errors, setErrors] = useState<Record<number, string>>({});
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   
   // Si no hay campos, mostrar mensaje
@@ -52,7 +52,7 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
   }
   
   // Manejar cambio de valor para un campo específico
-  const handleValueChange = (id: number, value: string) => {
+  const handleValueChange = (id: string, value: string) => {
     setValues({ ...values, [id]: value });
     
     // Limpiar error si el valor es válido
@@ -72,7 +72,7 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
     e.preventDefault();
     
     // Validar todos los campos requeridos
-    const newErrors: Record<number, string> = {};
+    const newErrors: Record<string, string> = {};
     let hasErrors = false;
     
     fields.forEach(field => {
@@ -121,44 +121,16 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
       </div>
     );
   }
-  
-  // Renderizar el contexto según el tipo de campo
-  const getFieldContext = (field: FormField) => {
-    switch (field.type) {
-      case 'text':
-        return 'Esta información nos ayuda a identificarte correctamente en nuestros registros.';
-      case 'email':
-        return 'Usaremos este email para enviarte confirmaciones y resultados médicos.';
-      case 'phone':
-        return 'Un número de contacto nos permite comunicarnos contigo para información importante.';
-      case 'textarea':
-        return 'Proporciona todos los detalles que consideres relevantes para tu condición médica.';
-      case 'date':
-        return 'La fecha exacta nos ayuda a tener un historial preciso.';
-      case 'select':
-      case 'radio':
-        return 'Selecciona la opción que mejor corresponda a tu situación.';
-      case 'checkbox':
-        return 'Marca esta casilla si la afirmación es correcta.';
-      case 'scale':
-        return 'Selecciona un valor en la escala que mejor represente tu respuesta.';
-      case 'file':
-        return 'Adjunta los documentos o imágenes relevantes para tu caso.';
-      case 'signature':
-        return 'Tu firma digital confirma la veracidad de la información proporcionada.';
-      default:
-        return '';
-    }
-  };
+
   
   // Obtener icono para el tipo de campo
-  const getFieldIcon = (type: string) => {
+  const getFieldIcon = (type: FieldType) => {
     switch (type) {
       case 'text':
         return <UserIcon className="w-5 h-5" />;
       case 'email':
         return <EnvelopeIcon className="w-5 h-5" />;
-      case 'phone':
+      case 'tel':
         return <PhoneIcon className="w-5 h-5" />;
       case 'textarea':
         return <DocumentTextIcon className="w-5 h-5" />;
@@ -214,7 +186,7 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
                   </div>
                   <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium flex items-center">
                     {getFieldIcon(field.type)}
-                    <span className="ml-1 capitalize">{field.type}</span>
+                    <span className="ml-1 capitalize">{fieldTypeLabels[field.type]}</span>
                   </div>
                 </div>
                 
@@ -225,10 +197,6 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
                   error={errors[field.id] || ''}
                 />
                 
-                {/* Texto de contexto */}
-                <div className="mt-2 text-xs text-gray-500 italic">
-                  {getFieldContext(field)}
-                </div>
               </div>
             ))}
           </div>
@@ -251,7 +219,6 @@ const MedicalFormPreview: React.FC<MedicalFormPreviewProps> = ({
               <Button
                 variant="primary"
                 type="submit"
-                className="px-8"
               >
                 Enviar formulario
               </Button>

@@ -137,3 +137,34 @@ export interface UpdateFormInput {
   is_active?: boolean;
   category?: string;
 } 
+
+export const fieldTypeLabels: Record<FieldType, string> = {
+  text: 'Campo de texto',
+  textarea: 'Texto largo',
+  email: 'Correo electrónico',
+  tel: 'Teléfono',
+  number: 'Número',
+  select: 'Selección',
+  radio: 'Opción única',
+  checkbox: 'Casilla de verificación',
+  date: 'Fecha',
+  scale: 'Escala',
+  file: 'Archivo',
+  signature: 'Firma',
+  time: 'Hora',
+  datetime: 'Fecha y hora'
+};
+
+// Props para componentes
+export interface FormFieldPreviewProps {
+  field: FormField;
+  value: string;
+  onChange: (value: string) => void;
+  error: string;
+}
+
+export interface FormFieldPropertiesProps {
+  field: FormField;
+  onChange: (updatedField: Partial<FormField>) => void;
+  removeField: () => void;
+}
