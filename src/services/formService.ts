@@ -9,7 +9,8 @@ import {
   NumericField,
   FieldWithOptions,
   ScaleField,
-  FileField
+  FileField,
+  DateTimeField
 } from '../types/form';
 
 export const transformFormFieldsToUI = (fields: FormField[]): FormField[] => {
@@ -59,6 +60,19 @@ export const transformFormFieldsToUI = (fields: FormField[]): FormField[] => {
           ...field,
           type,
           allowedTypes: (field as FileField).allowedTypes || ['image/*', 'application/pdf'],
+        };
+      case 'date':
+        return {
+          ...field,
+          type: 'date',
+          min: (field as DateTimeField).min || '',
+          max: (field as DateTimeField).max || '',
+        };
+      case 'checkbox':
+        return {
+          ...field,
+          type: 'checkbox',
+          checked: false,
         };
       case 'signature':
         return {

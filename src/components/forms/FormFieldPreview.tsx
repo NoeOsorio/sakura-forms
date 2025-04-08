@@ -1,5 +1,12 @@
 import React, { useRef } from 'react';
-import { FormField, FieldType, FieldWithOptions, ScaleField, FileField } from '../../types/form';
+import { 
+  FormField, 
+  FieldType, 
+  FieldWithOptions, 
+  ScaleField, 
+  FileField,
+  DateTimeField
+} from '../../types/form';
 import SignaturePad from 'react-signature-canvas';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
@@ -20,7 +27,7 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
     } else if (field.type === 'file') {
       const fileInput = e.target as HTMLInputElement;
       if (fileInput.files?.length) {
-        onChange(fileInput.files[0].name); // Solo guardamos el nombre por ahora
+        onChange(fileInput.files[0].name);
       }
     } else {
       onChange(e.target.value);
@@ -70,6 +77,44 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
     const defaultInputClasses = "w-full px-4 py-3 border border-gray-200 rounded-lg bg-white transition-all duration-200 ease-in-out focus:ring-1 focus:ring-teal-500 focus:border-teal-500 hover:border-gray-300";
 
     switch (field.type) {
+      case 'date':
+        return (
+          <input
+            type="date"
+            value={value}
+            onChange={handleChange}
+            className={defaultInputClasses}
+            min={(field as DateTimeField).min}
+            max={(field as DateTimeField).max}
+          />
+        );
+
+      case 'checkbox':
+        return (
+          <div className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+            <input
+              type="checkbox"
+              id={`field-${field.id}`}
+              checked={value === 'true'}
+              onChange={(e) => onChange(e.target.checked ? 'true' : 'false')}
+              className="w-4 h-4 mt-1 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+            />
+            <div>
+              <label htmlFor={`field-${field.id}`} className="block font-medium text-gray-800 cursor-pointer">
+                {field.label}
+                {field.required && (
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
+                    Requerido
+                  </span>
+                )}
+              </label>
+              {field.description && (
+                <p className="text-sm text-gray-500 mt-0.5">{field.description}</p>
+              )}
+            </div>
+          </div>
+        );
+
       case 'textarea':
         return (
           <textarea
@@ -78,6 +123,26 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
             placeholder={getPlaceholder()}
             className={`${defaultInputClasses} min-h-[120px]`}
             rows={5}
+          />
+        );
+
+      case 'time':
+        return (
+          <input
+            type="time"
+            value={value}
+            onChange={handleChange}
+            className={defaultInputClasses}
+          />
+        );
+
+      case 'datetime':
+        return (
+          <input
+            type="datetime-local"
+            value={value}
+            onChange={handleChange}
+            className={defaultInputClasses}
           />
         );
 
@@ -116,22 +181,6 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
                 </label>
               </div>
             ))}
-          </div>
-        );
-
-      case 'checkbox':
-        return (
-          <div className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
-            <input
-              type="checkbox"
-              id={`field-${field.id}`}
-              checked={value === 'true'}
-              onChange={handleChange}
-              className="w-4 h-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-            />
-            <label htmlFor={`field-${field.id}`} className="ml-3 text-sm text-gray-700 select-none cursor-pointer">
-              {field.description || field.label}
-            </label>
           </div>
         );
 
@@ -250,21 +299,23 @@ const FormFieldPreview = ({ field, value, onChange, error }: FormFieldPreviewPro
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col items-start">
-        <div className="flex items-center gap-2 mb-1">
-          <label className="block font-medium text-gray-800">
-            {field.label}
-          </label>
-          {field.required && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
-              Requerido
-            </span>
+      {field.type !== 'checkbox' ? (
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-2 mb-1">
+            <label className="block font-medium text-gray-800">
+              {field.label}
+            </label>
+            {field.required && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
+                Requerido
+              </span>
+            )}
+          </div>
+          {field.description && (
+            <p className="text-sm text-gray-500">{field.description}</p>
           )}
         </div>
-        {field.description && (
-          <p className="text-sm text-gray-500">{field.description}</p>
-        )}
-      </div>
+      ) : null}
 
       <div>
         {renderField()}
